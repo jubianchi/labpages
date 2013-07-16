@@ -1,3 +1,3 @@
-require './labpages'
+require './LabPagesHook'
 
 run LabPagesHook
