@@ -1,2 +1,3 @@
-require './GitPagesHook'
-run GitPagesHook
+require './labpages'
+
+run LabPagesHook
