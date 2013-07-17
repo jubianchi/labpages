@@ -52,7 +52,7 @@ start() {
     exit 1
   else
     if [ `whoami` = root ]; then
-      execute "cd $APP_ROOT && $EXEC $DAEMON_OPTS > $APP_LOG 2>&1 &"
+      execute "cd $APP_ROOT && $EXEC $DAEMON_OPTS > $APP_LOG 2>&1" &
 
       while [ "$PID" -eq 0 ]; do echo -n "."; sleep 1; check_pid; done
 
