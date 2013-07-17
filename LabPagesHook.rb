@@ -16,7 +16,7 @@ class LabPagesHook < Sinatra::Base
   set :bind, '0.0.0.0'
   set :port, 8080
 
-  get '/ping' do
+  get '/ping/?' do
     'Gitlab Web Hook is up and running :-)'
   end
 
