@@ -14,7 +14,7 @@ class LabPagesHook < Sinatra::Base
   end
 
   set :bind, '0.0.0.0'
-  set :port, 8080
+  set :port, 12000
 
   get '/ping/?' do
     'Gitlab Web Hook is up and running :-)'
@@ -22,11 +22,16 @@ class LabPagesHook < Sinatra::Base
 
   post '/update/?' do
     repoInfo = JSON.parse(request.body.read)
+    repoUrl = repoInfo['commits'][0]['url']
+    repoMatch = repoUrl.scan(/https?:\/\/([^\/]+)\/([^\/]+)\/([^\/]+)/)[0]
+    repoOwner = repoMatch[1]
+    repoName = repoMatch[2]
+    repoPath = [config['repo_dir'], repoOwner, repoName].join('/')
     branch = /([^\/]+)$/.match(repoInfo['ref'])[1]
-    username = repoInfo['commits'][0]['author']['name']
-    repoPath = [config['repo_dir'], username, repoInfo['repository']['name']].join('/')
 
-    logger.info("Updating #{repoInfo['repository']['name']}...")
+	puts branch
+
+    logger.info("Updating #{repoName}...")
 
     if branch != 'gl-pages' && branch != 'gh-pages'
       logger.info("Nothing to do with #{branch}!")
@@ -34,7 +39,7 @@ class LabPagesHook < Sinatra::Base
     end
 
     if File.exist? repoPath
-      logger.info("Pulling #{repoInfo['repository']['url']} into directory #{repoPath}...")
+      logger.info("Pulling #{repoOwner}/#{repoName} into directory #{repoPath}...")
 
       if system("cd #{repoPath}; git pull origin; git checkout -f #{branch}")
         logger.info('Successfully pulled repository!')
