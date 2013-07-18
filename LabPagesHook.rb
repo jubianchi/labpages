@@ -14,7 +14,7 @@ class LabPagesHook < Sinatra::Base
   end
 
   set :bind, '0.0.0.0'
-  set :port, 12000
+  set :port, 8080 
 
   get '/ping/?' do
     'Gitlab Web Hook is up and running :-)'
@@ -28,8 +28,6 @@ class LabPagesHook < Sinatra::Base
     repoName = repoMatch[2]
     repoPath = [config['repo_dir'], repoOwner, repoName].join('/')
     branch = /([^\/]+)$/.match(repoInfo['ref'])[1]
-
-	puts branch
 
     logger.info("Updating #{repoName}...")
 
@@ -108,7 +106,8 @@ class LabPagesHook < Sinatra::Base
     path = request.path_info;
 
     if !path.end_with? '/'
-      path += '/'
+      urlMatch = path.scan(/^\/([^\/]+)\/([^\/]+)/)[0]
+      redirect to('http://' + urlMatch[0] + '.' + config['domain'] + '/' + urlMatch[1] + '/')
     end
 
     match = /^\/[^\/]+\/$/.match(request.path_info)
