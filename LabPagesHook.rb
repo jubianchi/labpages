@@ -23,7 +23,8 @@ class LabPagesHook < Sinatra::Base
   post '/update/?' do
     repoInfo = JSON.parse(request.body.read)
     branch = /([^\/]+)$/.match(repoInfo['ref'])[1]
-    repoPath = [config['repo_dir'], repoInfo['user_name'], repoInfo['repository']['name']].join('/')
+    username = repoInfo['commits'][0]['author']['name']
+    repoPath = [config['repo_dir'], username, repoInfo['repository']['name']].join('/')
 
     logger.info("Updating #{repoInfo['repository']['name']}...")
 
