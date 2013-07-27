@@ -1,5 +1,5 @@
 repo_dir: /data/labpages
 log_file: /var/log/labpages.log
-domain: labpages.dp
-gitlab_url: http://labpages.dp
+domain: gitlab.dp
+gitlab_url: http://gitlab.dp
 logo_src: "http://placekitten.com/400/400"

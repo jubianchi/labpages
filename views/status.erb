@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Status &middot; LabPages</title>
+    <%= stylesheet_tag 'application' %>
+    <%= javascript_tag 'jquery' %>
+    <script>
+        var gitlabUrl = '<%= @gitlab %>';
+    </script>
+</head>
+
+<body>
+    <div class="container-narrow">
+        <h1>LabPages - Status</h1>
+
+        <div class="panel" id="hook">
+            <div class="panel-heading">
+                <h3 class="panel-title">LabPages Web Hook</h3>
+            </div>
+
+            <p class="status"></p>
+
+            <pre class="log"></pre>
+
+            <div class="panel-footer clearfix">
+              <a class="btn btn-small btn-info pull-right">Log</a>
+            </div>
+        </div>
+
+        <hr/>
+    </div>
+
+    <%= javascript_tag 'application' %>
+</body>
+</html>

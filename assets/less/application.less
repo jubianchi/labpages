@@ -1,0 +1,71 @@
+@import "assets/less/bootstrap/bootstrap.less";
+@import "assets/less/font-awesome/font-awesome.less";
+
+.container-narrow {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.panel, .well {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.panel .panel-title a {
+  text-decoration: none;
+}
+
+.panel-success .panel-title a {
+  color: @panel-success-text;
+  text-decoration: none;
+}
+
+.panel-danger .panel-title a {
+  color: @panel-danger-text;
+  text-decoration: none;
+}
+
+.panel-warning .panel-title a {
+  color: @panel-warning-text;
+  text-decoration: none;
+}
+
+.well {
+  padding: 10px;
+}
+
+.well .row {
+  margin: 0;
+}
+
+.well p {
+  margin-bottom: 5px;
+}
+
+.avatar {
+  height: 36px;
+  border-radius: 4px;
+  margin: 0 8px;
+}
+
+.alert {
+  margin: 20px 0;
+  padding: 15px 30px 15px 15px;
+  border: none;
+  border-left: 5px solid @alert-border;
+  border-radius: 0;
+}
+
+.alert-success {
+  border-color: @alert-success-border;
+}
+
+.alert-danger {
+  border-color: @alert-danger-border;
+}
+
+pre.log {
+  display: none;
+  max-height: 250px;
+  overflow: auto;
+}

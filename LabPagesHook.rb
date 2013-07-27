@@ -1,129 +1,99 @@
-require 'sinatra/base'
 require 'json'
 require 'yaml'
 require 'logger'
 require 'fileutils'
+require 'digest/md5'
+require 'open4'
+require 'sinatra/base'
+require 'less'
+require 'sprockets-helpers'
+require 'json'
 
 class LabPagesHook < Sinatra::Base
   config = YAML.load_file('config.yml')
   logger = Logger.new(config['log_file'], 'daily')
 
-  if  !File.exist? config['repo_dir']
+  unless File.exist? config['repo_dir']
     logger.info("Directory #{config['repo_dir']} does not exist, make it.")
     FileUtils.mkdir_p config['repo_dir']
   end
 
-  set :bind, '0.0.0.0'
-  set :port, 8080 
+  def deploy(dir, owner, repository, url = nil)
+    branch = 'gl-pages'
+    path = File.join(dir, owner, repository)
 
-  get '/ping/?' do
-    'Gitlab Web Hook is up and running :-)'
-  end
+    if File.exist? path
+      logger.info("Updating #{owner}/#{repository}...")
 
-  post '/update/?' do
-    repoInfo = JSON.parse(request.body.read)
-    repoUrl = repoInfo['commits'][0]['url']
-    repoMatch = repoUrl.scan(/https?:\/\/([^\/]+)\/([^\/]+)\/([^\/]+)/)[0]
-    repoOwner = repoMatch[1]
-    repoName = repoMatch[2]
-    repoPath = [config['repo_dir'], repoOwner, repoName].join('/')
-    branch = /([^\/]+)$/.match(repoInfo['ref'])[1]
-
-    logger.info("Updating #{repoName}...")
-
-    if branch != 'gl-pages' && branch != 'gh-pages'
-      logger.info("Nothing to do with #{branch}!")
-      return
-    end
-
-    if File.exist? repoPath
-      logger.info("Pulling #{repoOwner}/#{repoName} into directory #{repoPath}...")
-
-      if system("cd #{repoPath}; git pull origin; git checkout -f #{branch}")
+      if system("cd #{path}; git reset --hard; git pull origin; git checkout -f #{branch}")
         logger.info('Successfully pulled repository!')
       else
         logger.error('Failed to pull repository!')
       end
     else
-      logger.info("Cloning #{repoInfo['repository']['url']} into directory #{repoPath}...")
+      if url != nil
+        logger.info("Cloning #{url}...")
 
-      if system("git clone #{repoInfo['repository']['url']} #{repoPath};cd #{repoPath} && git checkout -f #{branch}");
-        logger.info('Successfully cloned repository!')
-      else
-        logger.error('Failed to clone repository!')
-      end
-    end
-  end
-
-  # for domains
-  before do
-    if !request.host.end_with? config['domain']
-      return
-    end
-
-    userName=request.host.gsub(config['domain'], '').gsub(/\.$/, '')
-
-    if userName.length > 0
-      match = /\/([^\/]+)/.match(request.path_info)
-
-      if match
-        repoName = match[1]
-        filePath=[config['repo_dir'], userName, repoName].join('/')
-
-        if File.exist? filePath
-          if request.path_info.end_with? repoName
-            redirect to(request.path_info + '/')
-          end
-
-          request.path_info = '/' + userName + '/' + request.path_info
-
-          return
+        if system("git clone #{url} #{path};cd #{path} && git checkout -f #{branch}");
+          logger.info('Successfully cloned repository!')
+        else
+          logger.error('Failed to clone repository!')
         end
       end
-      filePath=[config['repo_dir'], userName, userName].join('/')
-
-      if File.exist? filePath
-        request.path_info = '/' + userName + '/' + userName + request.path_info
-      end
     end
+
+    return info(dir, owner, repository)
   end
 
-  # for static files
-  get %r{\.\w+$} do
-    if request.path_info.include? '.git/'
-      raise Sinatra::NotFound
-    end
+  def info(dir, owner, repository)
+    path = File.join(dir, owner, repository)
+    pid, stdin, stdout, stderr = Open4.popen4("cd #{path} && git fetch origin")
+    ignored, exitcode = Process::waitpid2 pid
+    status = {
+      'owner' => owner,
+      'name' => repository,
+      'refs' => {
+        'deployed' => nil,
+        'remote' => nil,
+        'commits' => [],
+      },
+      'output' => stdout.read(),
+      'error' => stderr.read()
+    }
 
-    if File.exist? config['repo_dir'] + request.path_info
-      send_file config['repo_dir'] + request.path_info;
-    else
-      raise Sinatra::NotFound
-    end
-  end
+    if exitcode.to_i == 0
+      args = '--pretty=format:\'%H||%s||%cr||%an||%ae\' --date=relative'
+      commits = `cd #{path} && git --no-pager log HEAD^...origin/gl-pages #{args}`.lines()
 
-  # for index.html
-  get %r{.*$} do
-    path = request.path_info;
+      if commits.length <= 1
+        commits = `cd #{path} && git --no-pager log HEAD #{args}`.lines()
+        commits = [commits[0], commits[0]]
+      end
 
-    if !path.end_with? '/'
-      urlMatch = path.scan(/^\/([^\/]+)\/([^\/]+)/)[0]
-      redirect to('http://' + urlMatch[0] + '.' + config['domain'] + '/' + urlMatch[1] + '/')
-    end
+      commits.each_with_index do |commit, key|
+        commit = commit.split('||')
 
-    match = /^\/[^\/]+\/$/.match(request.path_info)
-    if match
-      redirect to(config['gitlab_url'] + '/u' + request.path_info)
-    end
+        if commit[4]
+          commit[4] = Digest::MD5.hexdigest(commit[4].gsub('\n', ''))
+        end
 
-    if File.exist?(config['repo_dir'] + path + 'index.html')
-      send_file config['repo_dir'] + path + 'index.html'
-    else
-      if File.exist?(config['repo_dir'] + path + 'index.htm')
-        send_file config['repo_dir'] + path + 'index.htm'
-      else
-        pass
+        if key == 0
+          status['refs']['remote'] = commit
+        else
+          if key === (commits.length - 1)
+            status['refs']['deployed'] = commit
+          else
+            status['refs']['commits'].push(commit)
+          end
+        end
       end
     end
+
+    return status
+  end
+
+  helpers do
+    include Sprockets::Helpers
   end
 
   not_found do
@@ -131,5 +101,113 @@ class LabPagesHook < Sinatra::Base
     erb :"404"
   end
 
-  run! if app_file == $0
+  get '/ping/?' do
+    content_type :json
+
+    { :message => 'LabPages Web Hook is up and running :-)' }.to_json
+  end
+
+  get '/log/?' do
+    send_file config['log_file']
+  end
+
+  get '/status/?' do
+    @gitlab = config['domain']
+    erb :"status"
+  end
+
+  post '/update/?' do
+    info = JSON.parse(request.body.read)
+    branch = /([^\/]+)$/.match(info['ref'])[1]
+
+    if branch != 'gl-pages'
+      logger.info("Nothing to do with #{branch}!")
+    else
+      matches = repoInfo['commits'][0]['url'].scan(/https?:\/\/([^\/]+)\/([^\/]+)\/([^\/]+)/)[0]
+
+      content_type :json
+      deploy(config['repo_dir'], matches[1], matches[2], repoInfo['commits'][0]['url']).to_json
+    end
+  end
+
+  get '/users/?' do
+    users = []
+
+    Dir.foreach(config['repo_dir']) do |user|
+      next if user == '.' or user == '..'
+
+      if File.directory?(File.join(config['repo_dir'], user))
+        user = {
+            'name' => user
+        }
+
+        users.push(user)
+      end
+    end
+
+    content_type :json
+    users.to_json
+  end
+
+  get '/users/:owner/repositories/?' do |owner|
+    repositories = []
+
+    Dir.foreach(File.join(config['repo_dir'], owner)) do |repository|
+      next if repository == '.' or repository == '..'
+
+      repositories.push(info(config['repo_dir'], owner, repository))
+    end
+
+    content_type :json
+    repositories.to_json
+  end
+
+  get '/users/:owner/repositories/:repository/?' do |owner, repository|
+    content_type :json
+    info(config['repo_dir'], owner, repository).to_json
+  end
+
+  get '/users/:owner/repositories/:repository/deploy/?' do |owner, repository|
+    content_type :json
+    deploy(config['repo_dir'], owner, repository).to_json
+  end
+
+  get %r{\.\w+$} do
+    if request.path_info.include? '.git/'
+      raise Sinatra::NotFound
+    end
+
+    if File.exist? request.path_info.gsub(/^\//, '')
+      send_file request.path_info.gsub(/^\//, '')
+    else
+      if File.exist? config['repo_dir'] + request.path_info
+        send_file config['repo_dir'] + request.path_info
+      else
+        raise Sinatra::NotFound
+      end
+    end
+  end
+
+  get %r{.*$} do
+    path = request.path_info
+
+    unless path.end_with? '/'
+      redirect to(path + '/')
+    end
+
+    match = /^\/[^\/]+\/$/.match(request.path_info)
+    if match
+      redirect to(config['gitlab_url'] + '/u' + request.path_info)
+    end
+
+    if File.exist?(config['repo_dir'] + path + 'index.htm')
+      send_file config['repo_dir'] + path + 'index.htm'
+    else
+      if File.exist?(config['repo_dir'] + path + 'index.html')
+        send_file config['repo_dir'] + path + 'index.html'
+      else
+        pass
+      end
+    end
+  end
 end

@@ -1,6 +1,15 @@
 server {
   listen *:80;
-  server_name ~^(?<username>.*)\.labpages\.dp$;
+  server_name ~^pages\.gitlab\.dp$;
+
+  location / {
+    proxy_pass http://127.0.0.1:4242/$request_uri;
+  }
+}
+
+server {
+  listen *:80;
+  server_name ~^(?<username>.*)\.gitlab\.dp$;
 
   location / {
     proxy_pass http://127.0.0.1:4242/$username$request_uri;
