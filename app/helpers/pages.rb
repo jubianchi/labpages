@@ -10,7 +10,7 @@ module LabPages
         if File.exist? path
           logger.info("Updating #{owner}/#{repository}...")
 
-          if system("cd #{path}; git reset --hard; git pull origin; git checkout -f #{branch}")
+          if system("cd #{path}; git fetch origin; git reset --hard origin/#{branch}")
             logger.info('Successfully pulled repository!')
           else
             logger.error('Failed to pull repository!')
@@ -42,8 +42,8 @@ module LabPages
                 'remote' => nil,
                 'commits' => [],
             },
-            'output' => stdout.read(),
-            'error' => stderr.read()
+            'output' => stdout.read() + (exitcode.to_i == 0 ? stderr.read() : ''),
+            'error' => (exitcode.to_i == 0 ? '' : stderr.read())
         }
 
         if exitcode.to_i == 0

@@ -4,12 +4,7 @@ module LabPages
   module Controllers
     module Hook
       def self.registered(app)
-        app.get '/status/?' do
-          @gitlab = app.settings.config['domain']
-          erb :"status"
-        end
-
-        app.post '/update/?' do
+        app.post '/hook/gitlab/?' do
           info = JSON.parse(request.body.read)
           branch = /([^\/]+)$/.match(info['ref'])[1]
 

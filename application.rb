@@ -11,15 +11,17 @@ require_relative 'app/controllers/static.rb'
 module LabPages
   class Application < Sinatra::Base
     configure do
-      set :config,        YAML.load_file(File.expand_path('../config/config.yml',  __FILE__))
-      set :logger,         Logger.new(:config['log_file'], 'daily')
+      set :app_root,      File.join(settings.root, 'app')
+      set :config_root,   File.join(settings.root, 'config')
+      set :config,        YAML.load_file(File.join(settings.config_root, 'config.yml'))
+      set :logger,        Logger.new(settings.config['log_file'], 'daily')
       set :bind,          '0.0.0.0'
       set :port,          8080
-      set :app_root,      File.expand_path('../app', __FILE__)
       set :sprockets,     Sprockets::Environment.new(settings.app_root)
       set :assets_prefix, '/assets'
       set :assets_path,   File.join(settings.app_root, 'assets')
       set :views,         File.join(settings.app_root, 'views')
+      set :logging,       settings.logger
 
       unless File.exist? settings.config['repo_dir']
         logger.info("Directory #{settings.config['repo_dir']} does not exist, make it.")
@@ -42,8 +44,8 @@ module LabPages
         )
       end
 
-      register LabPages::Controllers::Hook
       register LabPages::Controllers::API
+      register LabPages::Controllers::Hook
       register LabPages::Controllers::Static
     end
 

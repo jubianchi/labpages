@@ -9,42 +9,52 @@ module LabPages
           erb :"404"
         end
 
-        app.get %r{\.\w+$} do
-          if request.path_info.include? '.git/'
+        app.get '/status/?' do
+          @gitlab = app.settings.config['domain']
+          erb :"status"
+        end
+
+        app.get '/pages/:owner/?' do
+          path = request.path_info.gsub(/^\/pages/, '')
+
+          redirect to(app.settings.config['gitlab_url'] + '/u' + path)
+        end
+
+        app.get '/pages/:owner/:repository/*' do
+          path = request.path_info.gsub(/^\/pages/, '')
+
+          if path.include? '.git/'
             raise Sinatra::NotFound
           end
 
-          if File.exist? request.path_info.gsub(/^\//, '')
-            send_file request.path_info.gsub(/^\//, '')
+          if File.exist? path
+            send_file path
           else
-            if File.exist? app.settings.config['repo_dir'] + request.path_info
-              send_file app.settings.config['repo_dir'] + request.path_info
+            if File.exist?(app.settings.config['repo_dir'] + path)
+              if File.directory?(app.settings.config['repo_dir'] + path)
+                if File.exist?(app.settings.config['repo_dir'] + path + 'index.htm')
+                  send_file app.settings.config['repo_dir'] + path + 'index.htm'
+                else
+                  if File.exist?(app.settings.config['repo_dir'] + path + 'index.html')
+                    send_file app.settings.config['repo_dir'] + path + 'index.html'
+                  else
+                    pass
+                  end
+                end
+              else
+                send_file app.settings.config['repo_dir'] + path
+              end
             else
               raise Sinatra::NotFound
             end
           end
         end
 
-        app.get %r{.*$} do
-          path = request.path_info
+        app.get '/pages/:owner/:repository/?' do
+          path = request.path_info.gsub(/^\/pages/, '')
 
           unless path.end_with? '/'
-            redirect to(path + '/')
-          end
-
-          match = /^\/[^\/]+\/$/.match(request.path_info)
-          if match
-            redirect to(app.settings.config['gitlab_url'] + '/u' + request.path_info)
-          end
-
-          if File.exist?(app.settings.config['repo_dir'] + path + 'index.htm')
-            send_file app.settings.config['repo_dir'] + path + 'index.htm'
-          else
-            if File.exist?(app.settings.config['repo_dir'] + path + 'index.html')
-              send_file app.settings.config['repo_dir'] + path + 'index.html'
-            else
-              pass
-            end
+            redirect to('/pages' + path + '/')
           end
         end
       end

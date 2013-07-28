@@ -9,7 +9,7 @@
             $h3.html('Checking LabPages Web Hook status...');
 
             $.ajax({
-                url: '/ping',
+                url: '/api/ping',
                 timeout: 10000
             })
                 .done(function(data) {
@@ -94,8 +94,6 @@
         commits = function(repository, gitlabUrl) {
             var elems = [];
 
-            console.log(repository);
-
             if(repository.refs.remote && (!repository.refs.deployed || repository.refs.remote[0] != repository.refs.deployed[0])) {
                 elems.push($('<h6>').text('Remote'));
                 elems.push(commit(repository, repository.refs.remote, gitlabUrl));
@@ -173,10 +171,10 @@
 
             $('hr').nextAll('.panel').remove();
 
-            $.ajax('/users')
+            $.ajax('/api/users')
                 .done(function(users) {
                     users.forEach(function(user) {
-                        $.ajax('/users/' + user.name + '/repositories')
+                        $.ajax('/api/users/' + user.name + '/repositories')
                             .done(function(repositories) {
                                 repositories.forEach(function(repository) {
                                     $('hr').after(panel(repository, gitlabUrl));
@@ -233,13 +231,11 @@
                     $pre = $('pre', $hook);
 
                 $btn.click(function() {
-                    console.log($pre.css('display'));
-
                     if($pre.css('display') === 'block') {
                         $pre.toggle();
                     } else {
                         console.log('load');
-                        $.get('/log', function(data) { $pre.html(data).toggle(); });
+                        $.get('/api/log', function(data) { $pre.html(data).toggle(); });
                     }
                 });
 
