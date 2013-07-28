@@ -1,7 +1,5 @@
-# A sample Gemfile
 source "https://rubygems.org"
 
-# gem "rails"
 gem 'sinatra', '1.4.3'
 gem 'sprockets', '~> 2.10.0'
 gem 'sprockets-less', '~> 0.5.3'

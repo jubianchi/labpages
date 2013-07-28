@@ -28,6 +28,9 @@
                         case 'timeout':
                             $status.html($status.html() + '<strong>Request timed-out after 10 seconds</strong><br/>');
                             break;
+                        default:
+                            $status.html($status.html() + '<strong>No response from sevrer (' + err + ')</strong><br/>');
+                            break;
                     }
                 })
                 .always(function() {
@@ -99,8 +102,24 @@
             }
 
             if(repository.refs.commits.length) {
+                if(repository.refs.commits.length > 1) {
+                    elems.push(
+                        $('<span/>')
+                            .addClass('btn')
+                            .addClass('btn-default')
+                            .addClass('btn-more')
+                            .append($('<strong/>').text(repository.refs.commits.length + ' more commits...'))
+                    );
+                }
+
                 repository.refs.commits.forEach(function(cm) {
-                    elems.push(commit(repository, cm, gitlabUrl));
+                    cm = commit(repository, cm, gitlabUrl);
+
+                    if(repository.refs.commits.length > 1) {
+                        cm.addClass('commit');
+                    }
+
+                    elems.push(cm);
                 });
             }
 
@@ -195,6 +214,10 @@
 
                     $('.btn.log').click(function() {
                         $(this).parents('pre.log').toggle();
+                    });
+
+                    $('.btn-more').click(function() {
+                        $(this).nextAll('.commit').toggle();
                     });
 
                     $('h1').html('LabPages - Status <small>' + new Date().toLocaleString() + '</small>');
