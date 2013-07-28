@@ -1,0 +1,5 @@
+:verbose: false
+:pidfile: ./labpages.pid
+:concurrency:  5
+:queues:
+  - [default, 5]
