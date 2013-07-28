@@ -59,7 +59,8 @@ module LabPages
             commit = commit.split('||')
 
             if commit[4]
-              commit[4] = Digest::MD5.hexdigest(commit[4].gsub('\n', ''))
+              commit[4] = commit[4].downcase.lstrip.rstrip
+              commit[4] = Digest::MD5.hexdigest(commit[4])
             end
 
             if key == 0
