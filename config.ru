@@ -1,3 +1,6 @@
+require 'sidekiq/web'
+require 'em-websocket'
+
 require ::File.expand_path('../application.rb',  __FILE__)
 
 map LabPages::Application.settings.assets_prefix do
@@ -6,4 +9,8 @@ end
 
 map '/' do
   run LabPages::Application
+end
+
+map '/sidekiq' do
+  run Sidekiq::Web
 end
