@@ -44,6 +44,8 @@
             var cls = 'danger',
                 panel = $('<div/>').attr('id', repository.owner + '-' + repository.name);
 
+            $('#' + repository.owner + '-' + repository.name).remove();
+
             panel
                 .addClass('panel')
                 .append(
@@ -189,39 +191,6 @@
         };
 
     $(function() {
-        var refresh = function() {
-            init(gitlabUrl)
-                .then(function() {
-                    $('.deploy').click(function() {
-                        var info = $(this).parents('.panel').attr('id').split('-'),
-                            owner = info[0],
-                            repository = info[1],
-                            btn = $(this);
-
-                        btn.addClass('disabled');
-
-                        $.ajax('/users/' + owner + '/repositories/' + repository + '/deploy')
-                            .done(function(data) {
-                                $('#' + data.owner + '-' + data.name).replaceWith(
-                                    panel(data)
-                                );
-
-                                btn.removeClass('disabled');
-                            });
-                    });
-
-                    $('.btn.log').click(function() {
-                        $(this).parents('pre.log').toggle();
-                    });
-
-                    $('.btn-more').click(function() {
-                        $(this).nextAll('.commit').toggle();
-                    });
-
-                    $('h1').html('LabPages - Status <small>' + new Date().toLocaleString() + '</small>');
-                });
-        };
-
         $.ajaxSetup({ cache: false });
 
         check()
@@ -242,8 +211,46 @@
                 setInterval(check, 60000);
             })
             .then(function() {
-                refresh();
-                setInterval(refresh, 3600000);
+                var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
+                ws.onopen = function() {
+                    ws.send(JSON.stringify({
+                        'type': 'repositories'
+                    }));
+                };
+
+                ws.onmessage = function(msg) {
+                    msg = JSON.parse(msg.data);
+
+                    if(msg.type === 'update') {
+                        $('hr').after(panel(msg.content, gitlabUrl));
+                    }
+
+                    $('h1').html('LabPages - Status <small>' + new Date().toLocaleString() + '</small>');
+                };
+
+                $('.deploy').on('click', function() {
+                    var info = $(this).parents('.panel').attr('id').split('-'),
+                        owner = info[0],
+                        repository = info[1],
+                        btn = $(this);
+
+                    btn.addClass('disabled');
+
+                    $.ajax('/users/' + owner + '/repositories/' + repository + '/deploy')
+                        .done(function(data) {
+                            panel(data)
+
+                            btn.removeClass('disabled');
+                        });
+                });
+
+                $('.btn.log').on('click', function() {
+                    $(this).parents('pre.log').toggle();
+                });
+
+                $('.btn-more').on('click', function() {
+                    $(this).nextAll('.commit').toggle();
+                });
             });
     });
 })(window);

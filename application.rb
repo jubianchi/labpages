@@ -22,6 +22,7 @@ module LabPages
       set :assets_path,   File.join(settings.app_root, 'assets')
       set :views,         File.join(settings.app_root, 'views')
       set :logging,       settings.logger
+      set :sockets,       []
 
       unless File.exist? settings.config['repo_dir']
         logger.info("Directory #{settings.config['repo_dir']} does not exist, make it.")

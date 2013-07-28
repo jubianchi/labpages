@@ -1,4 +1,6 @@
 require 'sinatra'
+require 'sinatra-websocket'
+require 'json'
 
 module LabPages
   module Controllers
@@ -10,8 +12,51 @@ module LabPages
         end
 
         app.get '/status/?' do
-          @gitlab = app.settings.config['domain']
-          erb :"status"
+          if request.websocket?
+            request.websocket do |ws|
+              ws.onopen do
+                app.settings.sockets << ws
+              end
+
+              ws.onmessage do |message|
+                EM.next_tick do
+                    message = JSON.parse(message)
+
+                    if message['type'] == 'update'
+                      app.settings.sockets.each do |socket|
+                        socket.send(message.to_json)
+                      end
+                    end
+
+                    if message['type'] = 'repositories'
+                      Dir.foreach(app.settings.config['repo_dir']) do |user|
+                        next if user == '.' or user == '..'
+
+                        if File.directory?(File.join(app.settings.config['repo_dir'], user))
+                          Dir.foreach(File.join(app.settings.config['repo_dir'], user)) do |repository|
+                            next if repository == '.' or repository == '..'
+
+                            ws.send(
+                                {
+                                    'type' => 'update',
+                                    'content' => info(app.settings.config['repo_dir'], user, repository)
+                                }.to_json
+                            )
+                          end
+                        end
+                      end
+                    end
+                  end
+              end
+
+              ws.onclose do
+                app.settings.sockets.delete(ws)
+              end
+            end
+          else
+            @gitlab = app.settings.config['domain']
+            erb :"status"
+          end
         end
 
         app.get '/pages/:owner/?' do
