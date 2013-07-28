@@ -203,7 +203,6 @@
                     if($pre.css('display') === 'block') {
                         $pre.toggle();
                     } else {
-                        console.log('load');
                         $.get('/api/log', function(data) { $pre.html(data).toggle(); });
                     }
                 });
@@ -228,7 +227,7 @@
                     $('h1').html('LabPages - Status <small>' + new Date().toLocaleString() + '</small>');
                 };
 
-                $('.deploy').on('click', function() {
+                $('body').delegate('.deploy', 'click', function() {
                     var info = $(this).parents('.panel').attr('id').split('-'),
                         owner = info[0],
                         repository = info[1],
@@ -236,19 +235,17 @@
 
                     btn.addClass('disabled');
 
-                    $.ajax('/users/' + owner + '/repositories/' + repository + '/deploy')
-                        .done(function(data) {
-                            panel(data)
-
+                    $.ajax('/api/users/' + owner + '/repositories/' + repository + '/deploy')
+                        .fail(function(data) {
                             btn.removeClass('disabled');
                         });
                 });
 
-                $('.btn.log').on('click', function() {
+                $('body').delegate('.btn.log', 'click', function() {
                     $(this).parents('pre.log').toggle();
                 });
 
-                $('.btn-more').on('click', function() {
+                $('body').delegate('.btn-more', 'click', function() {
                     $(this).nextAll('.commit').toggle();
                 });
             });

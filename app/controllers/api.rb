@@ -1,6 +1,8 @@
 require 'json'
 require 'sinatra'
 
+require_relative '../workers/deploy.rb'
+
 module LabPages
   module Controllers
     module API
@@ -53,8 +55,7 @@ module LabPages
         end
 
         app.get '/api/users/:owner/repositories/:repository/deploy/?' do |owner, repository|
-          content_type :json
-          deploy(app.settings.config['repo_dir'], owner, repository).to_json
+          DeployWorker.perform_async(app.settings.config['repo_dir'], owner, repository);
         end
       end
     end

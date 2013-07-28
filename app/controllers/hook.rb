@@ -8,13 +8,10 @@ module LabPages
           info = JSON.parse(request.body.read)
           branch = /([^\/]+)$/.match(info['ref'])[1]
 
-          if branch != 'gl-pages'
-            logger.info("Nothing to do with #{branch}!")
-          else
+          if branch == 'gl-pages'
             matches = repoInfo['commits'][0]['url'].scan(/https?:\/\/([^\/]+)\/([^\/]+)\/([^\/]+)/)[0]
 
-            content_type :json
-            deploy(app.settings.config['repo_dir'], matches[1], matches[2], repoInfo['commits'][0]['url']).to_json
+            DeployWorker.perform_async(app.settings.config['repo_dir'], matches[1], matches[2], repoInfo['commits'][0]['url']);
           end
         end
       end
