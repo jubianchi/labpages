@@ -1,0 +1,5 @@
+:verbose: true
+:concurrency:  5
+:timeout: 10
+:queues:
+  - [labpages, 5]
