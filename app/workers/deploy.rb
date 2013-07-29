@@ -10,7 +10,7 @@ class DeployWorker
   sidekiq_options :queue => 'labpages'
 
   def perform(dir, owner, repository, url = nil)
-    deploy(dir, owner, repository, nil)
+    deploy(dir, owner, repository, url)
 
     UpdateWorker.perform_async(dir, owner, repository)
   end

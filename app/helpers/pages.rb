@@ -1,4 +1,5 @@
 require 'open4'
+require 'git'
 
 module LabPages
   module Helpers
@@ -10,20 +11,19 @@ module LabPages
         if File.exist? path
           logger.info("Updating #{owner}/#{repository}...")
 
-          if system("cd #{path}; git fetch origin; git reset --hard origin/#{branch}")
-            logger.info('Successfully pulled repository!')
-          else
-            logger.error('Failed to pull repository!')
-          end
+          repo = Git.open(path, :log => Logger.new(STDOUT))
+          repo.remote('origin').fetch
+          repo.reset_hard('origin/' + branch)
+
+          logger.info('Successfully updated repository!')
         else
           if url != nil
             logger.info("Cloning #{url}...")
 
-            if system("git clone #{url} #{path};cd #{path} && git checkout -f #{branch}");
-              logger.info('Successfully cloned repository!')
-            else
-              logger.error('Failed to clone repository!')
-            end
+            repo = Git.clone(url, repository, :path => path)
+            repo.checkout('gl-pages')
+
+            logger.info('Successfully cloned repository!')
           end
         end
 
@@ -32,8 +32,6 @@ module LabPages
 
       def info(dir, owner, repository)
         path = File.join(dir, owner, repository)
-        pid, stdin, stdout, stderr = Open4.popen4("cd #{path} && git fetch origin")
-        ignored, exitcode = Process::waitpid2 pid
         status = {
             'owner' => owner,
             'name' => repository,
@@ -41,41 +39,37 @@ module LabPages
                 'deployed' => nil,
                 'remote' => nil,
                 'commits' => [],
-            },
-            'output' => stdout.read() + (exitcode.to_i == 0 ? stderr.read() : ''),
-            'error' => (exitcode.to_i == 0 ? '' : stderr.read())
+            }
         }
 
-        if exitcode.to_i == 0
-          args = '--pretty=format:\'%H||%s||%cr||%an||%ae\' --date=relative'
-          commits = `cd #{path} && git --no-pager log HEAD^...origin/gl-pages #{args}`.lines()
+        repo = Git.open(path, :log => Logger.new(STDOUT))
+        repo.remote('origin').fetch
 
-          if commits.length <= 1
-            commits = `cd #{path} && git --no-pager log HEAD #{args}`.lines()
-            commits = [commits[0], commits[0]]
-          end
+        commits = repo.log.between('HEAD', 'origin/gh-pages')
+        if commits.count <= 1
+          commits = [repo.gcommit('HEAD'), repo.gcommit('HEAD')]
+        end
 
-          commits.each_with_index do |commit, key|
-            commit = commit.split('||')
+        commits.each_with_index do |commit, key|
+          commit = [
+              commit.sha,
+              commit.message,
+              commit.author.name,
+              Digest::MD5.hexdigest(commit.author.email)
+          ]
 
-            if commit[4]
-              commit[4] = commit[4].downcase.lstrip.rstrip
-              commit[4] = Digest::MD5.hexdigest(commit[4])
-            end
-
-            if key == 0
-              status['refs']['remote'] = commit
+          if key == 0
+            status['refs']['remote'] = commit
+          else
+            if key === (commits.count - 1)
+              status['refs']['deployed'] = commit
             else
-              if key === (commits.length - 1)
-                status['refs']['deployed'] = commit
-              else
-                status['refs']['commits'].push(commit)
-              end
+              status['refs']['commits'].push(commit)
             end
           end
         end
 
-        return status
+        status
       end
     end
   end

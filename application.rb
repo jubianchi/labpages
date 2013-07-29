@@ -2,9 +2,10 @@ require 'yaml'
 require 'logger'
 require 'sprockets-helpers'
 require 'sinatra/base'
-require 'sidekiq-bossman'
 
 require_relative 'app/helpers/pages.rb'
+require_relative 'app/workers.rb'
+
 require_relative 'app/controllers/hook.rb'
 require_relative 'app/controllers/api.rb'
 require_relative 'app/controllers/static.rb'
@@ -49,28 +50,6 @@ module LabPages
       register LabPages::Controllers::API
       register LabPages::Controllers::Hook
       register LabPages::Controllers::Static
-
-      if settings.config['start_sidekiq']
-        settings.logger.info('Starting sidekiq...')
-
-        Sidekiq::Bossman.new(
-            settings.app_root,
-            {
-              :config => File.join(settings.config_root, 'sidekiq.yml'),
-              :logfile => settings.config['log_file'],
-              :pidfile => File.join(settings.config_root, 'labpages.pid'),
-              :require => File.join(settings.app_root, 'workers.rb')
-            }
-        ).start_workers
-      end
-    end
-
-    at_exit do
-      if settings.config['start_sidekiq']
-        settings.logger.info('Stopping sidekiq...')
-
-        Sidekiq::Bossman.new(settings.app_root).stop_workers
-      end
     end
 
     helpers do

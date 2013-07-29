@@ -63,11 +63,11 @@
                         )
                 );
 
-            if(repository.refs && repository.error === '') {
+            if(repository.refs.deployed && repository.refs.remote) {
                 panel.append(commits(repository, gitlabUrl));
 
                 cls = 'warning';
-                if(repository.refs.deployed && repository.refs.remote && repository.refs.deployed[0] === repository.refs.remote[0]) {
+                if(repository.refs.deployed[0] === repository.refs.remote[0]) {
                     cls = 'success';
                 } else {
                     panel
