@@ -2,6 +2,7 @@ require 'yaml'
 require 'logger'
 require 'sprockets-helpers'
 require 'sinatra/base'
+require 'sidekiq-bossman'
 
 require_relative 'app/helpers/pages.rb'
 require_relative 'app/controllers/hook.rb'
@@ -15,8 +16,8 @@ module LabPages
       set :config_root,   File.join(settings.root, 'config')
       set :config,        YAML.load_file(File.join(settings.config_root, 'config.yml'))
       set :logger,        Logger.new(settings.config['log_file'], 'daily')
-      set :bind,          '0.0.0.0'
-      set :port,          8080
+      set :bind,          settings.config['bind']
+      set :port,          settings.config['port']
       set :sprockets,     Sprockets::Environment.new(settings.app_root)
       set :assets_prefix, '/assets'
       set :assets_path,   File.join(settings.app_root, 'assets')
@@ -48,6 +49,28 @@ module LabPages
       register LabPages::Controllers::API
       register LabPages::Controllers::Hook
       register LabPages::Controllers::Static
+
+      if settings.config['start_sidekiq']
+        settings.logger.info('Starting sidekiq...')
+
+        Sidekiq::Bossman.new(
+            settings.app_root,
+            {
+              :config => File.join(settings.config_root, 'sidekiq.yml'),
+              :logfile => settings.config['log_file'],
+              :pidfile => File.join(settings.config_root, 'labpages.pid'),
+              :require => File.join(settings.app_root, 'workers.rb')
+            }
+        ).start_workers
+      end
+    end
+
+    at_exit do
+      if settings.config['start_sidekiq']
+        settings.logger.info('Stopping sidekiq...')
+
+        Sidekiq::Bossman.new(settings.app_root).stop_workers
+      end
     end
 
     helpers do

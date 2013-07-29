@@ -49,19 +49,35 @@
 }
 
 .alert {
-  margin: 20px 0;
+  margin: 0;
   padding: 15px 30px 15px 15px;
   border: none;
   border-left: 5px solid @alert-border;
   border-radius: 0;
+
+  h6 {
+    font-size: @font-size-base * 1.6;
+
+    small {
+      font-size: 0.5em;
+    }
+  }
 }
 
 .alert-success {
   border-color: @alert-success-border;
+
+  h6 small {
+    color: @alert-success-text;
+  }
 }
 
 .alert-danger {
   border-color: @alert-danger-border;
+
+  h6 small {
+    color: @alert-danger-text;
+  }
 }
 
 pre.log {
@@ -78,4 +94,8 @@ pre.log {
   .icon(@ellipsis-horizontal);
   display: block;
   margin-bottom: 20px;
+}
+
+.btn-reconnect {
+  display: none;
 }

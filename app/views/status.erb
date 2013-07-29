@@ -14,18 +14,20 @@
     <div class="container-narrow">
         <h1>LabPages - Status</h1>
 
-        <div class="panel" id="hook">
-            <div class="panel-heading">
-                <h3 class="panel-title">LabPages Web Hook</h3>
+        <div class="alert" id="hook">
+            <div class="clearfix">
+                <h6 class="pull-left">LabPages Web Hook</h6>
+                <p class="pull-right"><a class="btn btn-small btn-info">Log</a></p>
             </div>
 
             <p class="status"></p>
 
             <pre class="log"></pre>
+        </div>
 
-            <div class="panel-footer clearfix">
-              <a class="btn btn-small btn-info pull-right">Log</a>
-            </div>
+        <div class="alert clearfix" id="socket">
+            <h6 class="pull-left">LabPages WebSocket</h6>
+            <p class="pull-right"><a class="btn btn-small btn-success btn-reconnect">Reconnect</a></p>
         </div>
 
         <hr/>

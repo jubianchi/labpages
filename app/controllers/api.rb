@@ -8,9 +8,19 @@ module LabPages
     module API
       def self.registered(app)
         app.get '/api/ping/?' do
+          stats = Sidekiq::Stats.new
+          @failed = stats.failed
+          @processed = stats.processed
+
           content_type :json
 
-          { :message => 'LabPages Web Hook is up and running :-)' }.to_json
+          {
+              :message => 'LabPages Web Hook is up and running :-)',
+              :sidekiq => {
+                :failed => stats.failed,
+                :processed => stats.processed
+              }
+          }.to_json
         end
 
         app.get '/api/log/?' do

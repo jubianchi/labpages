@@ -2,34 +2,35 @@
     var $ = window.jQuery,
         check = function() {
             var $hook = $('#hook'),
-                $h3 = $('h3', $hook),
-                $status = $('.status', $hook).html(''),
+                $h6 = $('h6', $hook),
+                $status = $('.status', $hook),
                 df = $.Deferred();
 
-            $h3.html('Checking LabPages Web Hook status...');
+            $h6.html('Checking LabPages Web Hook status...');
 
             $.ajax({
                 url: '/api/ping',
                 timeout: 10000
             })
                 .done(function(data) {
-                    $('#hook').removeClass('panel-danger').addClass('panel-success');
-                    $h3.html(data.message)
+                    $('#hook').removeClass('alert-danger').addClass('alert-success');
+                    $h6.html(data.message + ' <small>(jobs: ' + data.sidekiq.processed + '/' + data.sidekiq.failed + ')</small>');
+                    $status.html('');
                 })
                 .fail(function() {
-                    $('#hook').removeClass('panel-success').addClass('panel-danger');
-                    $h3.html('LabPages Web Hook is down :-(');
+                    $('#hook').removeClass('alert-success').addClass('alert-danger');
+                    $h6.html('LabPages Web Hook is down :-(');
                 })
                 .error(function(xhr, err) {
                     switch(err) {
                         case 'abort':
-                            $status.html($status.html() + '<strong>Request was aborted</strong><br/>');
+                            $status.html('<strong>Request was aborted</strong><br/>');
                             break;
                         case 'timeout':
-                            $status.html($status.html() + '<strong>Request timed-out after 10 seconds</strong><br/>');
+                            $status.html('<strong>Request timed-out after 10 seconds</strong><br/>');
                             break;
                         default:
-                            $status.html($status.html() + '<strong>No response from sevrer (' + err + ')</strong><br/>');
+                            $status.html('<strong>No response from sevrer (' + err + ')</strong><br/>');
                             break;
                     }
                 })
@@ -210,22 +211,46 @@
                 setInterval(check, 60000);
             })
             .then(function() {
-                var ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
-                ws.onopen = function() {
-                    ws.send(JSON.stringify({
-                        'type': 'repositories'
-                    }));
+                var connect = function() {
+                    var df = $.Deferred();
+                        ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
+                    ws.onopen = function() {
+                        ws.send(JSON.stringify({
+                            'type': 'repositories'
+                        }));
+
+                        $('#socket').addClass('alert-success').removeClass('alert-danger');
+
+                        df.resolve();
+                    };
+
+                    ws.onclose = function() {
+                        $('.btn-reconnect').show();
+                        $('#socket').addClass('alert-danger').removeClass('alert-success');
+                    };
+
+                    ws.onmessage = function(msg) {
+                        msg = JSON.parse(msg.data);
+
+                        if(msg.type === 'update') {
+                            $('hr').after(panel(msg.content, gitlabUrl));
+                        }
+
+                        $('h1').html('LabPages - Status <small>' + new Date().toLocaleString() + '</small>');
+                    };
+
+                    return df;
                 };
 
-                ws.onmessage = function(msg) {
-                    msg = JSON.parse(msg.data);
+                $('body').delegate('.btn-reconnect', 'click', function() {
+                    $(this).addClass('disabled');
 
-                    if(msg.type === 'update') {
-                        $('hr').after(panel(msg.content, gitlabUrl));
-                    }
+                    connect().then(function() {
+                        $('.btn-reconnect').removeClass('disabled').hide();
+                    });
+                });
+                connect();
 
-                    $('h1').html('LabPages - Status <small>' + new Date().toLocaleString() + '</small>');
-                };
 
                 $('body').delegate('.deploy', 'click', function() {
                     var info = $(this).parents('.panel').attr('id').split('-'),

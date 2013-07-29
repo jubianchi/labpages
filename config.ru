@@ -1,5 +1,5 @@
 require 'sidekiq/web'
-require 'em-websocket'
+require 'sidetiq/web'
 
 require ::File.expand_path('../application.rb',  __FILE__)
 
