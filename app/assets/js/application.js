@@ -214,6 +214,7 @@
                 var connect = function() {
                     var df = $.Deferred();
                         ws = new WebSocket('ws://' + window.location.host + window.location.pathname);
+
                     ws.onopen = function() {
                         ws.send(JSON.stringify({
                             'type': 'repositories'
@@ -227,6 +228,10 @@
                     ws.onclose = function() {
                         $('.btn-reconnect').show();
                         $('#socket').addClass('alert-danger').removeClass('alert-success');
+
+                        $('#socket .status').html('<small>Down since ' + new Date().toLocaleString() + '</small>');
+
+                        df.resolve();
                     };
 
                     ws.onmessage = function(msg) {
@@ -236,7 +241,13 @@
                             $('hr').after(panel(msg.content, gitlabUrl));
                         }
 
-                        $('h1').html('LabPages - Status <small>' + new Date().toLocaleString() + '</small>');
+                        $('#socket .status').html('<small>Last event on ' + new Date().toLocaleString() + '</small>');
+                    };
+
+                    ws.onerror = function() {
+                        $(this).removeClass('disabled');
+
+                        df.resolve();
                     };
 
                     return df;
