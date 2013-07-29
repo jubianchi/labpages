@@ -2,9 +2,13 @@ require 'sinatra'
 require 'sinatra-websocket'
 require 'json'
 
+require_relative '../helpers/pages.rb'
+
 module LabPages
   module Controllers
     module Static
+      include LabPages::Helpers::Pages
+
       def self.registered(app)
         app.not_found do
           @logo = app.settings.config['logo_src']
@@ -29,21 +33,13 @@ module LabPages
                     end
 
                     if message['type'] = 'repositories'
-                      Dir.foreach(app.settings.config['repo_dir']) do |user|
-                        next if user == '.' or user == '..'
-
-                        if File.directory?(File.join(app.settings.config['repo_dir'], user))
-                          Dir.foreach(File.join(app.settings.config['repo_dir'], user)) do |repository|
-                            next if repository == '.' or repository == '..'
-
-                            ws.send(
-                                {
-                                    'type' => 'update',
-                                    'content' => info(app.settings.config['repo_dir'], user, repository)
-                                }.to_json
-                            )
-                          end
-                        end
+                      fetch_all.each do |repository|
+                        ws.send(
+                            {
+                                'type' => 'update',
+                                'content' => repository
+                            }.to_json
+                        )
                       end
                     end
                   end

@@ -1,9 +1,38 @@
 require 'open4'
 require 'git'
+require 'redis'
 
 module LabPages
   module Helpers
     module Pages
+      @@redis = Redis.new
+
+      def store(repository)
+        slug = repository['owner'] + '/' + repository['name']
+
+        repositories = JSON.parse(@@redis.get('labpages:repositories') || '[]')
+        repositories << slug unless repositories.include?(slug)
+        @@redis.set('labpages:repositories', repositories.to_json)
+
+        @@redis.set(
+            'labpages:' + slug,
+            repository.to_json
+        )
+      end
+
+      def fetch(owner, repository)
+        JSON.parse(@@redis.get('labpages:' + owner + '/' + repository))
+      end
+
+      def fetch_all()
+        repositories = []
+        JSON.parse(@@redis.get('labpages:repositories') || '[]').each do |slug|
+          repositories << JSON.parse(@@redis.get('labpages:' + slug))
+        end
+
+        repositories
+      end
+
       def deploy(dir, owner, repository, url = nil)
         branch = 'gl-pages'
         path = File.join(dir, owner, repository)
@@ -54,6 +83,7 @@ module LabPages
           commit = [
               commit.sha,
               commit.message,
+              commit.author.date,
               commit.author.name,
               Digest::MD5.hexdigest(commit.author.email)
           ]
@@ -68,6 +98,8 @@ module LabPages
             end
           end
         end
+
+        store(status)
 
         status
       end
