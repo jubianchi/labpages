@@ -1,0 +1,17 @@
+#!/bin/bash
+DIR=$(realpath $(dirname $0))
+[ -z $PORT ] && PORT=8080
+[ -z $ENV ] && ENV=development
+
+stop() {
+    kill -9 $(cat $DIR/../redis.pid) cat > /dev/null 2>&1 && rm $DIR/../redis.pid
+    kill -9 $(cat $DIR/../labpages.pid) > /dev/null 2>&1 && rm $DIR/../labpages.pid
+}
+trap stop INT
+
+$DIR/redis &
+echo $$ > $DIR/../redis.pid
+
+ENV=$ENV $DIR/sidekiq &
+
+rackup -p $PORT -E $ENV $*
