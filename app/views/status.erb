@@ -4,39 +4,122 @@
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <title>Status &middot; LabPages</title>
     <%= stylesheet_tag 'application' %>
+
+    <%= javascript_tag 'angular' %>
     <%= javascript_tag 'jquery' %>
     <script>
-        var gitlabUrl = '<%= @gitlab %>';
+        var LabPages = {
+            endpoint: '<%= @ws_endpoint %>',
+            gitlabUrl: '<%= @gitlab %>',
+            domain: '<%= @domain %>'
+        };
     </script>
+    <%= javascript_tag 'application' %>
 </head>
 
-<body>
-    <div class="container-narrow">
+<body ng-app="labpages">
+    <div class="container" ng-controller='LabPagesCtrl'>
         <h1>LabPages - Status</h1>
 
-        <div class="alert" id="hook">
+        <div class="alert" ng-class="{'alert-success': hook.up, 'alert-danger': !hook.up}">
             <div class="clearfix">
                 <h6 class="pull-left">LabPages Web Hook</h6>
-                <p class="pull-right"><a class="btn btn-small btn-info">Log</a></p>
+                <p class="status pull-right"><small>Last ping on {{hook.time}}</small></p>
             </div>
-
-            <p class="status"></p>
-
-            <pre class="log"></pre>
         </div>
 
-        <div class="alert" id="socket">
+        <div ng-class="{'alert-success': socket.connected, 'alert-danger': !socket.connected}" class="alert" id="socket">
             <div class="clearfix">
                 <h6 class="pull-left">LabPages WebSocket</h6>
-                <p class="pull-right"><a class="btn btn-small btn-success btn-reconnect">Reconnect</a></p>
+                <p class="pull-right" ng-show="!socket.connected">
+                    <a id="reconnect" class="btn btn-small btn-success" ng-click="reconnect(this, $event)">Reconnect</a>
+                </p>
+                <p class="status pull-right" ng-show="socket.connected">
+                    <small>Last event on {{socket.time}}</small>
+                </p>
             </div>
-
-            <p class="status"></p>
         </div>
 
         <hr/>
-    </div>
 
-    <%= javascript_tag 'application' %>
+        <div ng-repeat="repository in repositories" class="panel" ng-class="{'panel-danger': !repository.refs.deployed || !repository.refs.remote, 'panel-success': repository.refs.deployed[0] == repository.refs.remote[0], 'panel-warning': repository.refs.deployed[0] != repository.refs.remote[0]}">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title pull-left">
+                    <a ng-href="//{{repository.owner}}.{{application.domain}}/{{repository.name}}">{{repository.owner}}/{{repository.name}}</a>
+                </h3>
+                <small class="pull-right">
+                    {{repository.time}}
+                </small>
+            </div>
+
+            <div ng-show="repository.refs.remote && (!repository.refs.deployed || repository.refs.remote[0] != repository.refs.deployed[0])">
+                <h6>
+                    Remote
+                </h6>
+
+                <div class="well">
+                    <div class="row">
+                        <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{repository.refs.remote[4]}}"/>
+                        <p class="pull-left">
+                            <strong>{{repository.refs.remote[1]}}</strong><br/>
+                            <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.remote[3]}}">{{repository.refs.remote[3]}}</a> authored {{repository.refs.remote[2]}}
+                        </p>
+                        <div class="pull-right">
+                            <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{repository.refs.remote[0]}}">
+                                <i class="icon icon-eye-open icon-large"></i> {{repository.refs.remote[0] | substr:0:9}}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <a class="btn btn-default btn-more" ng-click="more(this, $event)" ng-show="repository.refs.commits.length && repository.refs.commits.length > 1">
+                    <strong>{{repository.refs.commits.length}} more <span ng-show="repository.refs.commits.length > 1">commits</span><span ng-show="repository.refs.commits.length == 1">commit</span>...</strong>
+                </a>
+
+                <div ng-repeat="commit in repository.refs.commits" class="well commit">
+                    <div class="row">
+                        <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{commit[4]}}"/>
+                        <p class="pull-left">
+                            <strong>{{commit[1]}}</strong><br/>
+                            <a ng-href="{{application.gitlabUrl}}/u/{{commit[3]}}">{{commit[3]}}</a> authored {{commit[2]}}
+                        </p>
+                        <div class="pull-right">
+                            <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{commit[0]}}">
+                                <i class="icon icon-eye-open icon-large"></i> {{commit[0] | substr:0:9}}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h6 ng-show="repository.refs.deployed">
+                Deployed
+            </h6>
+
+            <div ng-show="repository.refs.deployed" class="well">
+                <div class="row">
+                    <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{repository.refs.deployed[4]}}"/>
+                    <p class="pull-left">
+                        <strong>{{repository.refs.deployed[1]}}</strong><br/>
+                        <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.deployed[3]}}">{{repository.refs.deployed[3]}}</a> authored {{repository.refs.deployed[2]}}
+                    </p>
+                    <div class="pull-right">
+                        <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{repository.refs.deployed[0]}}">
+                          <i class="icon icon-eye-open icon-large"></i> {{repository.refs.deployed[0] | substr:0:9}}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div ng-show="!repository.refs.deployed || !repository.refs.remote">
+                <p>Can't determine page status...</p>
+                <pre>{{repository.error}}</pre>
+            </div>
+
+            <div class="panel-footer clearfix" ng-show="repository.refs.deployed[0] != repository.refs.remote[0]">
+                <a href="#" class="btn btn-small btn-success pull-right deploy" ng-click="deploy(this, $event)">Deploy</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

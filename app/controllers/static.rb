@@ -1,6 +1,4 @@
 require 'sinatra'
-require 'sinatra-websocket'
-require 'json'
 
 require_relative '../helpers/pages.rb'
 
@@ -16,43 +14,10 @@ module LabPages
         end
 
         app.get '/status/?' do
-          if request.websocket?
-            request.websocket do |ws|
-              ws.onopen do
-                app.settings.sockets << ws
-              end
-
-              ws.onmessage do |message|
-                EM.next_tick do
-                    message = JSON.parse(message)
-
-                    if message['type'] == 'update'
-                      app.settings.sockets.each do |socket|
-                        socket.send(message.to_json)
-                      end
-                    end
-
-                    if message['type'] = 'repositories'
-                      fetch_all.each do |repository|
-                        ws.send(
-                            {
-                                'type' => 'update',
-                                'content' => repository
-                            }.to_json
-                        )
-                      end
-                    end
-                  end
-              end
-
-              ws.onclose do
-                app.settings.sockets.delete(ws)
-              end
-            end
-          else
-            @gitlab = app.settings.config['domain']
-            erb :"status"
-          end
+          @gitlab = app.settings.config['gitlab_url']
+          @domain = app.settings.config['domain']
+          @ws_endpoint = 'ws://' + app.settings.config['domain'] + ':' + app.settings.config['port'].to_s + '/socket'
+          erb :"status"
         end
 
         app.get '/pages/:owner/?' do
@@ -91,12 +56,14 @@ module LabPages
           end
         end
 
-        app.get '/pages/:owner/:repository/?' do
-          path = request.path_info.gsub(/^\/pages/, '')
+        app.get '/pages/:owner/:repository/?' do |owner, repository|
+          path = request.path_info
 
-          unless path.end_with? '/'
-            redirect to('/pages' + path + '/')
+          if request.host.include? owner
+            path = path.gsub(/^\/pages/, '').gsub('/' + owner + '/', '')
           end
+
+          redirect path + '/' unless path.end_with? '/'
         end
       end
     end

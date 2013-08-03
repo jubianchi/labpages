@@ -23,10 +23,6 @@ module LabPages
           }.to_json
         end
 
-        app.get '/api/log/?' do
-          send_file app.settings.config['log_file']
-        end
-
         app.get '/api/users/?' do
           users = []
 

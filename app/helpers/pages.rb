@@ -35,7 +35,8 @@ module LabPages
 
       def deploy(dir, owner, repository, url = nil)
         branch = 'gl-pages'
-        path = File.join(dir, owner, repository)
+        user_home = File.join(dir, owner)
+        path = File.join(user_home, repository)
 
         if File.exist? path
           logger.info("Updating #{owner}/#{repository}...")
@@ -49,14 +50,13 @@ module LabPages
           if url != nil
             logger.info("Cloning #{url}...")
 
-            repo = Git.clone(url, repository, :path => path)
+            Dir.mkdir(user_home) unless File.exist? user_home
+            repo = Git.clone(url, repository, :path => user_home)
             repo.checkout('gl-pages')
 
             logger.info('Successfully cloned repository!')
           end
         end
-
-        return info(dir, owner, repository)
       end
 
       def info(dir, owner, repository)
@@ -74,7 +74,7 @@ module LabPages
         repo = Git.open(path, :log => Logger.new(STDOUT))
         repo.remote('origin').fetch
 
-        commits = repo.log.between('HEAD', 'origin/gh-pages')
+        commits = repo.log.between('HEAD', 'origin/gl-pages')
         if commits.count <= 1
           commits = [repo.gcommit('HEAD'), repo.gcommit('HEAD')]
         end

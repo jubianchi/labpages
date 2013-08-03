@@ -6,13 +6,15 @@
   margin: 0 auto;
 }
 
-.panel, .well {
-  -webkit-box-shadow: none;
-  box-shadow: none;
-}
+.panel {
+  .panel-title a {
+    text-decoration: none;
+  }
 
-.panel .panel-title a {
-  text-decoration: none;
+  .well {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
 }
 
 .panel-success .panel-title a {
@@ -32,14 +34,14 @@
 
 .well {
   padding: 10px;
-}
 
-.well .row {
-  margin: 0;
-}
+  .row {
+    margin: 0;
+  }
 
-.well p {
-  margin-bottom: 5px;
+  p {
+    margin-bottom: 5px;
+  }
 }
 
 .avatar {
@@ -91,11 +93,6 @@ pre.log {
 }
 
 .btn.btn-more {
-  .icon(@ellipsis-horizontal);
   display: block;
   margin-bottom: 20px;
-}
-
-.btn-reconnect {
-  display: none;
 }

@@ -9,6 +9,7 @@ require_relative 'app/workers.rb'
 require_relative 'app/controllers/hook.rb'
 require_relative 'app/controllers/api.rb'
 require_relative 'app/controllers/static.rb'
+require_relative 'app/controllers/socket.rb'
 
 module LabPages
   class Application < Sinatra::Base
@@ -50,6 +51,7 @@ module LabPages
       register LabPages::Controllers::API
       register LabPages::Controllers::Hook
       register LabPages::Controllers::Static
+      register LabPages::Controllers::Socket
     end
 
     helpers do
