@@ -1,0 +1,18 @@
+Vagrant.configure("2") do |config|
+  config.vm.box_url = "resources/wheezy/wheezy.box"
+  config.vm.box = "wheezy"
+
+  config.vm.network :private_network, ip: "192.168.50.4"
+
+  config.vm.hostname = "labpages"
+
+  config.cache.auto_detect = true
+  config.cache.enable :gem
+  config.cache.enable :apt
+
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.hostmanager.aliases = %w(root.labpages pages.labpages)
+
+  config.vm.provision :shell, :path => "resources/provisioning/labpages.sh"
+end

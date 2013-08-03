@@ -1,4 +1,11 @@
-config.yml
-labpages*
+Vagrantfile
+config/config.yml
+config/sidekiq.yml
+config/nginx.conf
+
+.vagrant
+packer_cache
+*.box
 dump.rdb
+
 
