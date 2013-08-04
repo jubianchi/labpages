@@ -2,4 +2,4 @@
 DIR=$(realpath $(dirname $0)/..)
 [ -z $ENV ] && ENV=development
 
-sidekiq -C $DIR/config/sidekiq.yml -r $DIR/app/workers.rb -e $ENV $*
+sidekiq -d -C $DIR/config/sidekiq.yml -r $DIR/app/workers.rb -e $ENV $*
