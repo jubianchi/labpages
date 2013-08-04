@@ -1,15 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <title>Not found &middot; LabPages</title>
-  <%= stylesheet_tag 'application' %>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Not found &middot; LabPages</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.428571429;
+            color: #333333;
+            background-color: #f1f1f1;
+        }
+
+        .container-narrow {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 61px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-weight: 100;
+            line-height: 1.1;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container-narrow" style="text-align: center">
         <h1>404</h1>
-        <p><strong>There isn't a Gitlab Page here.</strong></p>
+        <p><strong>Nothing to see here...</strong></p>
         <img alt="404" src="<%= @logo %>" style="height: 350px"/>
     </div>
 </body>

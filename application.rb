@@ -1,7 +1,8 @@
 require 'yaml'
 require 'logger'
-require 'sprockets-helpers'
 require 'sinatra/base'
+require 'sinatra/assetpack'
+require 'less'
 
 require_relative 'app/helpers/pages.rb'
 require_relative 'app/workers.rb'
@@ -13,14 +14,16 @@ require_relative 'app/controllers/socket.rb'
 
 module LabPages
   class Application < Sinatra::Base
+    Less.paths <<  "#{settings.root}/app/assets/less"
+
     configure do
+      set :root,          File.dirname(__FILE__)
       set :app_root,      File.join(settings.root, 'app')
       set :config_root,   File.join(settings.root, 'config')
       set :config,        YAML.load_file(File.join(settings.config_root, 'config.yml'))
       set :logger,        Logger.new(settings.config['log_file'], 'daily')
       set :bind,          settings.config['bind']
       set :port,          settings.config['port']
-      set :sprockets,     Sprockets::Environment.new(settings.app_root)
       set :assets_prefix, '/assets'
       set :assets_path,   File.join(settings.app_root, 'assets')
       set :views,         File.join(settings.app_root, 'views')
@@ -32,21 +35,25 @@ module LabPages
         FileUtils.mkdir_p settings.config['repo_dir']
       end
 
-      %w(. less js).each do |asset_directory|
-        settings.sprockets.append_path File.join(settings.assets_path, asset_directory)
-      end
+      register Sinatra::AssetPack
 
-      Sprockets::Helpers.configure do |config|
-        config.environment = settings.sprockets
-        config.prefix      = settings.assets_prefix
-        config.digest      = true
-        config.manifest    = Sprockets::Manifest.new(
-            settings.sprockets,
-            File.join(
-                settings.app_root, 'assets', 'manifest.json'
-            )
-        )
-      end
+      assets {
+        serve '/js',  from: 'app/assets/js'        # Default
+        serve '/css', from: 'app/assets/less'      # Default
+
+        js :appjs, '/js/app.js', [
+          '/js/jquery.js',
+          '/js/angular.js',
+          '/js/application.js'
+        ]
+
+        css :appcss, '/css/app.css', [
+          '/css/application.css'
+        ]
+
+        #js_compression  :jsmin    # :jsmin | :yui | :closure | :uglify
+        #css_compression :simple   # :simple | :sass | :yui | :sqwish
+      }
 
       register LabPages::Controllers::API
       register LabPages::Controllers::Hook
@@ -55,7 +62,6 @@ module LabPages
     end
 
     helpers do
-      include Sprockets::Helpers
       include LabPages::Helpers::Pages
     end
   end

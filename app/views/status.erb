@@ -3,10 +3,8 @@
 <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <title>Status &middot; LabPages</title>
-    <%= stylesheet_tag 'application' %>
 
-    <%= javascript_tag 'angular' %>
-    <%= javascript_tag 'jquery' %>
+    <%= css :appcss %>
     <script>
         var LabPages = {
             endpoint: '<%= @ws_endpoint %>',
@@ -14,7 +12,7 @@
             domain: '<%= @domain %>'
         };
     </script>
-    <%= javascript_tag 'application' %>
+    <%= js  :appjs %>
 </head>
 
 <body ng-app="labpages">
