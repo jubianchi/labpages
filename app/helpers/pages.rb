@@ -74,7 +74,7 @@ module LabPages
         repo = Git.open(path, :log => Logger.new(STDOUT))
         repo.remote('origin').fetch
 
-        commits = repo.log.between('HEAD', 'origin/gl-pages')
+        commits = repo.log.between('HEAD~', 'origin/gl-pages')
         if commits.count <= 1
           commits = [repo.gcommit('HEAD'), repo.gcommit('HEAD')]
         end

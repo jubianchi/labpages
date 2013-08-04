@@ -71,10 +71,10 @@
                 </div>
 
                 <a class="btn btn-default btn-more" ng-click="more(this, $event)" ng-show="repository.refs.commits.length && repository.refs.commits.length > 1">
-                    <strong>{{repository.refs.commits.length}} more <span ng-show="repository.refs.commits.length > 1">commits</span><span ng-show="repository.refs.commits.length == 1">commit</span>...</strong>
+                    <strong>{{repository.refs.commits.length}} more commits...</strong>
                 </a>
 
-                <div ng-repeat="commit in repository.refs.commits" class="well commit">
+                <div ng-repeat="commit in repository.refs.commits" class="well" ng-class="{'commit': repository.refs.commits.length && repository.refs.commits.length > 1}">
                     <div class="row">
                         <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{commit[4]}}"/>
                         <p class="pull-left">

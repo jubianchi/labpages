@@ -166,8 +166,6 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
         .on(['repository', 'update'], function (message) {
             var updated = false;
 
-            console.log(message);
-
             $scope.socket.time = new Date().toLocaleString();
             message.content.time = new Date().toLocaleString();
             $scope.repositories.forEach(function(repository, key) {
