@@ -1,0 +1,5 @@
+Host labpages
+   StrictHostKeyChecking no
+
+Host debian
+   StrictHostKeyChecking no
