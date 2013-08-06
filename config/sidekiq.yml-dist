@@ -1,0 +1,7 @@
+:logfile:     /var/log/labpages/sidekiq.log
+:pidfile:     /var/run/labpages/sidekiq.pid
+:verbose:     true
+:concurrency: 5
+:timeout:     10
+:queues:
+  - [labpages, 5]

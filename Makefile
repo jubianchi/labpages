@@ -14,10 +14,10 @@ box-mirror:
 box-deploy: box
 	rsync -az --progress resources/wheezy/wheezy.box static.jubianchi.fr:/var/www/static.jubianchi.fr/boxes
 
-provision:
+provision: cookbooks
 	vagrant provision
 
-start: down resources/wheezy/wheezy.box cookbooks Vagrantfile
+start: down resources/wheezy/wheezy.box Vagrantfile
 	vagrant up --no-provision
 
 cookbooks:

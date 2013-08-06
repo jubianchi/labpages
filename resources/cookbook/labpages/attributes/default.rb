@@ -16,7 +16,7 @@ default['labpages']['domain']                     = node['labpages']['app_name']
 default['labpages']['gitlab_url']                 = "http://#{node['labpages']['domain']}"
 default['labpages']['repo_dir']                   = "/var/#{node['labpages']['app_name']}"
 default['labpages']['log_file']                   = "#{node['labpages']['log_dir']}/labpages.log"
-default['labpages']['logo_src']                   = 'http://placekitten.com/400/400'
+default['labpages']['logo_src']                   = "http://placekitten.com/400/400"
 
 default['labpages']['sidekiq']['log_file']        = "#{node['labpages']['log_dir']}/sidekiq.log"
 default['labpages']['sidekiq']['pid_file']        = "#{node['labpages']['pid_dir']}/sidekiq.pid"
