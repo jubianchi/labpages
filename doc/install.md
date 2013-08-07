@@ -117,7 +117,7 @@ $ sudo apdate-rc.d labpages defaults
 ```sh
 $ sudo cp /home/git/labpages/resources/vhosts/nginx.conf /etc/nginx/sites-available/labpages
 $ sudo ln -s /etc/nginx/sites-available/labpages /etc/nginx/sites-enabled/labpages
-``
+```
 
 ### Start everything
 
