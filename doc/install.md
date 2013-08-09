@@ -12,7 +12,8 @@ If you want to use LabPages subdomains, you will also need **nginx**.
 
 ## Using Chef cookbook
 
-Install LabPages using the Chef cookbook is as simple as including the ```labpages```recipe in your run list.
+Install LabPages using the Chef cookbook is as simple as including the ```labpages```recipe in your run list. You
+will find everything you nedd in the [resources/cookbook](resources/cookbook) directory.
 By doing this, you will deploy the default LabPages which will not configure your webserver. If you want to do so,
 manually add the ```labpages::nginx```recipe to your run list.
 

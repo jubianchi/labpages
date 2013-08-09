@@ -22,7 +22,9 @@
         <div class="alert" ng-class="{'alert-success': hook.up, 'alert-danger': !hook.up}">
             <div class="clearfix">
                 <h6 class="pull-left">LabPages Web Hook</h6>
-                <p class="status pull-right"><small>Last ping on {{hook.time}}</small></p>
+                <p class="status pull-right" ng-show="hook.up">
+                  <small>Last ping on {{hook.time}}</small>
+                </p>
             </div>
         </div>
 
