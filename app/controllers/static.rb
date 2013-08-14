@@ -10,7 +10,7 @@ module LabPages
       def self.registered(app)
         app.not_found do
           @logo = app.settings.config['logo_src']
-          erb :"404"
+          erb :'404'
         end
 
         app.get '/status/?' do
@@ -20,50 +20,37 @@ module LabPages
           erb :"status"
         end
 
-        app.get '/pages/:owner/?' do
-          path = request.path_info.gsub(/^\/pages/, '')
-
-          redirect to(app.settings.config['gitlab_url'] + '/u' + path)
-        end
-
-        app.get '/pages/:owner/:repository/*' do
-          path = request.path_info.gsub(/^\/pages/, '')
-
-          if path.include? '.git/'
+        app.get %r{/pages/([^/]*)/([^/]*)/?(.*)} do |owner, repository, rest|
+          if rest.include? '.git/'
             raise Sinatra::NotFound
           end
 
-          if File.exist? path
-            send_file path
-          else
-            if File.exist?(app.settings.config['repo_dir'] + path)
-              if File.directory?(app.settings.config['repo_dir'] + path)
-                if File.exist?(app.settings.config['repo_dir'] + path + 'index.htm')
-                  send_file app.settings.config['repo_dir'] + path + 'index.htm'
-                else
-                  if File.exist?(app.settings.config['repo_dir'] + path + 'index.html')
-                    send_file app.settings.config['repo_dir'] + path + 'index.html'
-                  else
-                    pass
-                  end
-                end
-              else
-                send_file app.settings.config['repo_dir'] + path
+          if repository != '' and File.directory? File.join(app.settings.config['repo_dir'], owner, repository)
+            unless request.path.end_with? '/'
+              path = request.path
+
+              if request.host.include? owner
+                path = path.gsub(/^\/pages/, '').gsub('/' + owner + '/', '')
               end
-            else
-              raise Sinatra::NotFound
+
+              redirect to('/' + path + '/')
+            end
+
+            file = serve(rest, app.settings.config['repo_dir'], owner, repository)
+          else
+            rest = repository + ('/' + rest unless rest == nil)
+            file = serve(rest, app.settings.config['repo_dir'], owner, owner + '-' + app.settings.config['domain'].gsub('.', '-'))
+
+            unless file and File.file? file
+              redirect to(app.settings.config['gitlab_url'] + '/u/' + owner) if repository == ''
             end
           end
-        end
 
-        app.get '/pages/:owner/:repository/?' do |owner, repository|
-          path = request.path_info
-
-          if request.host.include? owner
-            path = path.gsub(/^\/pages/, '').gsub('/' + owner + '/', '')
+          unless file and File.file? file
+            raise Sinatra::NotFound
           end
 
-          redirect path + '/' unless path.end_with? '/'
+          send_file file
         end
       end
     end

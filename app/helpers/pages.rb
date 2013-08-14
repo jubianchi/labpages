@@ -103,6 +103,22 @@ module LabPages
 
         status
       end
+
+      def serve(request, dir, owner, repository)
+        path = File.join(dir, owner, repository, request)
+
+        if File.directory?(path)
+          if File.exist?(File.join(path, 'index.htm'))
+            path = File.join(path, 'index.htm')
+          end
+
+          if File.exist?(File.join(path, 'index.html'))
+            path = File.join(path, 'index.html')
+          end
+        end
+
+        path
+      end
     end
   end
 end
