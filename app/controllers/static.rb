@@ -33,7 +33,7 @@ module LabPages
                 path = path.gsub(/^\/pages/, '').gsub('/' + owner + '/', '')
               end
 
-              redirect to('/' + path + '/')
+              redirect to('/' + path + '/') unless rest != ''
             end
 
             file = serve(rest, app.settings.config['repo_dir'], owner, repository)

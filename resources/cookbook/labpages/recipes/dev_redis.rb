@@ -2,8 +2,8 @@ service 'redis-server' do
   action :stop
 end
 
-template '/var/lib/redis/dump.rdb' do
-  source 'dev/dump.rdb'
+cookbook_file '/var/lib/redis/dump.rdb' do
+  source 'dump.rdb'
   owner 'redis'
   group 'redis'
 end

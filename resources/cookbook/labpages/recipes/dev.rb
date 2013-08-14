@@ -1,19 +1,19 @@
-template "/home/#{node['labpages']['git_user']}/.ssh/id_rsa" do
-  source 'dev/id_rsa'
+cookbook_file "/home/#{node['labpages']['git_user']}/.ssh/id_rsa" do
+  source 'id_rsa'
   owner node['labpages']['git_user']
   group node['labpages']['git_user']
   mode 0600
 end
 
-template "/home/#{node['labpages']['git_user']}/.ssh/id_rsa.pub" do
-  source 'dev/id_rsa.pub'
+cookbook_file "/home/#{node['labpages']['git_user']}/.ssh/id_rsa.pub" do
+  source 'id_rsa.pub'
   owner node['labpages']['git_user']
   group node['labpages']['git_user']
   mode 0600
 end
 
-template "/home/#{node['labpages']['git_user']}/.ssh/config" do
-  source 'dev/ssh_config'
+cookbook_file "/home/#{node['labpages']['git_user']}/.ssh/config" do
+  source 'ssh_config'
   owner node['labpages']['git_user']
   group node['labpages']['git_user']
   mode 0700

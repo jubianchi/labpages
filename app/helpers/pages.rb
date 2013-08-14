@@ -1,3 +1,4 @@
+require 'yaml'
 require 'open4'
 require 'git'
 require 'redis'
@@ -57,6 +58,12 @@ module LabPages
             logger.info('Successfully cloned repository!')
           end
         end
+
+        config = File.join(path, '_config.yml')
+        puts config
+        if File.exists? config
+          `cd #{path} && jekyll build`
+        end
       end
 
       def info(dir, owner, repository)
@@ -106,6 +113,16 @@ module LabPages
 
       def serve(request, dir, owner, repository)
         path = File.join(dir, owner, repository, request)
+
+        config = File.join(dir, owner, repository, '_config.yml')
+        if File.exists? config
+          config = YAML.load_file(config)
+
+          path = File.join(dir, owner, repository, '_site', request)
+          if config['destination']
+            path = File.join(dir, owner, repository, config['destination'], request)
+          end
+        end
 
         if File.directory?(path)
           if File.exist?(File.join(path, 'index.htm'))

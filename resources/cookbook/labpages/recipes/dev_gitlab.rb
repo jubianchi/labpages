@@ -9,14 +9,14 @@ directory '/home/git/gitlab/tmp/backups' do
   action :create
 end
 
-template '/home/git/gitlab/tmp/backups/1375649073_gitlab_backup.tar' do
-  source 'dev/1375649073_gitlab_backup.tar'
+cookbook_file '/home/git/gitlab/tmp/backups/1375649073_gitlab_backup.tar' do
+  source '1375649073_gitlab_backup.tar'
   owner 'git'
   group 'git'
 end
 
-template '/tmp/restore.expect' do
-  source 'dev/restore.expect'
+cookbook_file '/tmp/restore.expect' do
+  source 'restore.expect'
   owner node['labpages']['git_user']
   group node['labpages']['git_user']
 end

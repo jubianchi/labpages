@@ -10,8 +10,11 @@ directory "/home/#{node['labpages']['git_user']}/repositories" do
   group node['labpages']['git_user']
 end
 
-['root/second', 'root/third', 'root/root-labpages', 'labpages/labpages-labpages'].each do |repo|
-  git "/home/#{node['labpages']['git_user']}/repositories/#{repo.split('/')[1]}" do
+['root/second', 'root/third', 'root/root-labpages', 'labpages/labpages-labpages', 'root/jekyll'].each do |repo|
+  repo_owner = repo.split('/')[0]
+  repo_name = repo.split('/')[1]
+
+  git "/home/#{node['labpages']['git_user']}/repositories/#{repo_name}" do
     repository "git@labpages:#{repo}"
     reference 'gl-pages'
     user node['labpages']['git_user']
@@ -20,8 +23,7 @@ end
     action :sync
   end
 
-  owner = repo.split('/')[0]
-  directory "#{node['labpages']['repo_dir']}/#{owner}" do
+  directory "#{node['labpages']['repo_dir']}/#{repo_owner}" do
     action :create
     owner node['labpages']['git_user']
     group node['labpages']['git_user']
