@@ -10,9 +10,9 @@ directory "/home/#{node['labpages']['git_user']}/repositories" do
   group node['labpages']['git_user']
 end
 
-['first', 'second'].each do |repo|
-  git "/home/#{node['labpages']['git_user']}/repositories/#{repo}" do
-    repository "git@labpages:root/#{repo}"
+['root/second', 'root/third', 'root/root-labpages', 'labpages/labpages-labpages'].each do |repo|
+  git "/home/#{node['labpages']['git_user']}/repositories/#{repo.split('/')[1]}" do
+    repository "git@labpages:#{repo}"
     reference 'gl-pages'
     user node['labpages']['git_user']
     group node['labpages']['git_user']
@@ -20,8 +20,15 @@ end
     action :sync
   end
 
-  git "#{node['labpages']['repo_dir']}/root/#{repo}" do
-    repository "git@labpages:root/#{repo}"
+  owner = repo.split('/')[0]
+  directory "#{node['labpages']['repo_dir']}/#{owner}" do
+    action :create
+    owner node['labpages']['git_user']
+    group node['labpages']['git_user']
+  end
+
+  git "#{node['labpages']['repo_dir']}/#{repo}" do
+    repository "git@labpages:#{repo}"
     reference 'gl-pages'
     user node['labpages']['git_user']
     group node['labpages']['git_user']
@@ -30,8 +37,8 @@ end
   end
 end
 
-git "/home/#{node['labpages']['git_user']}/repositories/third" do
-  repository "git@labpages:root/third"
+git "/home/#{node['labpages']['git_user']}/repositories/first" do
+  repository "git@labpages:root/first"
   reference 'gl-pages'
   user node['labpages']['git_user']
   group node['labpages']['git_user']
@@ -39,8 +46,8 @@ git "/home/#{node['labpages']['git_user']}/repositories/third" do
   action :sync
 end
 
-git "#{node['labpages']['repo_dir']}/root/third" do
-  repository "git@labpages:root/third"
+git "#{node['labpages']['repo_dir']}/root/first" do
+  repository "git@labpages:root/first"
   reference 'gl-pages'
   user node['labpages']['git_user']
   group node['labpages']['git_user']
@@ -50,6 +57,6 @@ end
 
 execute 'revert_some_commit' do
   command 'git reset --hard origin/gl-pages~3'
-  cwd "#{node['labpages']['repo_dir']}/root/third"
+  cwd "#{node['labpages']['repo_dir']}/root/first"
   user node['labpages']['git_user']
 end
