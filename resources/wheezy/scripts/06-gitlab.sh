@@ -4,7 +4,7 @@ cd /home/git
 sudo -u git -H git clone https://github.com/gitlabhq/gitlabhq.git gitlab
 
 cd /home/git/gitlab
-sudo -u git -H git checkout 5-3-stable
+sudo -u git -H git checkout master
 
 cd /home/git/gitlab
 sudo -u git -H cp config/gitlab.yml.example config/gitlab.yml
