@@ -120,6 +120,53 @@
                 <a href="#" class="btn btn-small btn-success pull-right deploy" ng-click="deploy(this, $event)">Deploy</a>
             </div>
         </div>
+
+        <hr/>
+
+        <p style="text-align: center">
+            <a data-toggle="modal" href="#howto" class="btn btn-link">How to enable ?</a>
+        </p>
+    </div>
+
+    <div class="modal fade" id="howto">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Enable LabPages</h4>
+                </div>
+                <div class="modal-body">
+                    <ol>
+                        <li>
+                          <p>Create <strong>an orphan <code>gl-pages</code> branch</strong> in your repository</p>
+
+                          <pre>git checkout --orphan gl-pages
+git commit -m"Initial labpages commit" --allow-empty</pre>
+                        </li>
+                        <li>
+                          <p>Add the following <strong>deploy key</strong> to your repository</p>
+
+                          <pre><%= @public_key %></pre>
+                        </li>
+                        <li>
+                            <p>Enable LabPages <strong>web hook</strong></p>
+
+                            <pre>http://pages.<%= @domain %>/hook/gitlab</pre>
+                        </li>
+                        <li>
+                          <p><strong>Push your branch</strong> to your remote</p>
+
+                          <pre>git push origin gl-pages:gl-pages -u</pre>
+                        </li>
+                        <li>
+                          <p><strong>Browse</strong> to your static website</p>
+
+                          <pre>http://owner.<%= @domain %>/repository</pre>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

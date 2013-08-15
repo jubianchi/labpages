@@ -44,6 +44,7 @@ module LabPages
         js :appjs, '/js/app.js', [
           '/js/jquery.js',
           '/js/angular.js',
+          '/js/bootstrap.js',
           '/js/application.js'
         ]
 

@@ -17,7 +17,8 @@ module LabPages
           @gitlab = app.settings.config['gitlab_url']
           @domain = app.settings.config['domain']
           @ws_endpoint = 'ws://' + app.settings.config['domain'] + ':' + app.settings.config['port'].to_s + '/socket'
-          erb :"status"
+          @public_key = File.read(File.expand_path('~/.ssh/id_rsa.pub'))
+          erb :status
         end
 
         app.get %r{/pages/([^/]*)/([^/]*)/?(.*)} do |owner, repository, rest|
