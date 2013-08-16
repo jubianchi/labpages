@@ -6,7 +6,6 @@ config/nginx.conf
 .vagrant
 packer_cache
 *.box
-dump.rdb
 cookbooks
 
 
