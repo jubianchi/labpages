@@ -103,7 +103,7 @@ $ sudo -u git -H vim config/sidekiq.yml
 $ sudo gem install bundler --no-ri --no-rdoc
 
 $ cd /home/git/labpages
-$ sudo -u git -H bundle install
+$ sudo -u git -H bundle install  --deployment
 ```
 
 ### Register the services

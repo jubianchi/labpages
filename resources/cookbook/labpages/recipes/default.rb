@@ -35,7 +35,7 @@ end
 
 execute 'bundle_app' do
   cwd node['labpages']['app_dir']
-  command "sudo -u #{node['labpages']['git_user']} -H bundle install"
+  command "sudo -u #{node['labpages']['git_user']} -H bundle install --deployment"
 end
 
 template "/etc/init.d/labpages" do

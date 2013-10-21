@@ -21,11 +21,11 @@ APP_ROOT="<%= @app_dir %>"
 APP_LOG="<%= @log_file %>"
 APP_USER="<%= @git_user %>"
 
-LABPAGES_EXEC=$(which rackup)
+LABPAGES_EXEC="bundle exec rackup"
 LABPAGES_PID_PATH="<%= @pid_dir %>/<%= @app_name %>.pid"
 LABPAGES_DAEMON_OPTS="-p <%= @port %> -P $LABPAGES_PID_PATH -E <%= @env %> $APP_ROOT/config.ru > <%= @log_file %> 2>&1 &"
 
-SIDEKIQ_EXEC=$(which sidekiq)
+SIDEKIQ_EXEC="bundle exec sidekiq"
 SIDEKIQ_PID_PATH="<%= @sidekiq['pid_file'] %>"
 SIDEKIQ_DAEMON_OPTS="-d -C <%= @config_dir %>/sidekiq.yml -r <%= @app_dir %>/app/workers.rb -e <%= @env %>"
 
