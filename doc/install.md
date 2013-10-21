@@ -110,7 +110,7 @@ $ sudo -u git -H bundle install
 
 ```sh
 $ sudo cp /home/git/labpages/resources/services/init.d /etc/init.d/labpages
-$ sudo apdate-rc.d labpages defaults
+$ sudo update-rc.d labpages defaults
 ```
 
 ### Enable nginx virtualhost
