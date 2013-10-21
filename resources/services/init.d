@@ -26,7 +26,8 @@ APP_ENV=production
 
 LABPAGES_EXEC=$(which rackup)
 LABPAGES_PID_PATH="/var/run/labpages/$NAME.pid"
-LABPAGES_DAEMON_OPTS="-p $APP_PORT -P $LABPAGES_PID_PATH -E $APP_ENV $APP_ROOT/config.ru > $APP_LOG/labpages.log 2>&1 &"
+LABPAGES_LOG_PATH="$APP_LOG/labpages.log"
+LABPAGES_DAEMON_OPTS="-p $APP_PORT -P $LABPAGES_PID_PATH -E $APP_ENV $APP_ROOT/config.ru > $LABPAGES_LOG_PATH 2>&1 &"
 
 SIDEKIQ_EXEC=$(which sidekiq)
 SIDEKIQ_PID_PATH="/var/run/labpages/sidekiq.pid"
@@ -61,7 +62,7 @@ start_labpages() {
         return 1
     else
         if [ `whoami` = root ]; then
-            execute "$LABPAGES_EXEC $LABPAGES_DAEMON_OPTS > $APP_LOG 2>&1"
+            execute "$LABPAGES_EXEC $LABPAGES_DAEMON_OPTS > $LABPAGES_LOG_PATH 2>&1"
 
             echo -n "Starting $NAME"
 
