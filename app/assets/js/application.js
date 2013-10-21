@@ -18,9 +18,7 @@ var labpages = angular
             start: function (done, fail, always) {
                 this.intervalId = setInterval(
                     function () {
-                        $rootScope.$apply(function() {
-                            ping(done, fail, always);
-                        });
+                        ping(done, fail, always);
                     },
                     this.interval
                 );
@@ -130,16 +128,20 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
 
     pinger.start(
         function() {
-            $scope.hook = {
-                up: true,
-                time: new Date().toLocaleString()
-            };
+            $scope.$apply(function() {
+                $scope.hook = {
+                    up: true,
+                    time: new Date().toLocaleString()
+                };
+            });
         },
         function() {
-            $scope.hook = {
-                up: false,
-                time: new Date().toLocaleString()
-            };
+            $scope.$apply(function() {
+                $scope.hook = {
+                    up: false,
+                    time: new Date().toLocaleString()
+                };
+            });
         }
     );
 
