@@ -34,7 +34,8 @@ SIDEKIQ_PID_PATH="/var/run/labpages/sidekiq.pid"
 SIDEKIQ_DAEMON_OPTS="-d -C $APP_CONFIG/sidekiq.yml -r $APP_ROOT/app/workers.rb -e $APP_ENV"
 
 execute() {
-  sudo -u $APP_USER -H bash -l -c "$1"
+    cd $APP_ROOT
+    sudo -u $APP_USER -H bash -l -c "$1"
 }
 
 check_labpages_pid() {
