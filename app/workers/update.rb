@@ -19,7 +19,7 @@ class UpdateWorker
       {
         :type => 'update',
         :content => info(dir, owner, repository)
-      }.to_json
+      }.to_json.encode('UTF-8')
     )
   end
 end
