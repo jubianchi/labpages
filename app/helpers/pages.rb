@@ -106,7 +106,7 @@ module LabPages
         commits.each_with_index do |commit, key|
           commit = [
               commit.sha,
-              commit.message,
+              commit.message.force_encoding('UTF-8'),
               commit.author.date,
               commit.author.name,
               Digest::MD5.hexdigest(commit.author.email)

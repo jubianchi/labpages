@@ -172,6 +172,25 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
         }
     );
 
+    $http({
+        method: 'GET',
+        url: '/api/users'
+    })
+        .success(function(reponse) {
+            reponse.forEach(function(user) {
+                $http({
+                    method: 'GET',
+                    url: '/api/users/' + user.name + '/repositories'
+                })
+                    .success(function(repository) {
+                        $scope.repositories.push(repository);
+                    });
+            });
+
+
+        });
+
+
     socket
         .connect()
         .on('open', function () {
@@ -180,7 +199,7 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
                 time: new Date().toLocaleString()
             };
 
-            socket.emit('repositories');
+            //socket.emit('repositories');
         })
         .on(['close', 'error'], function (e) {
             $scope.socket = {
