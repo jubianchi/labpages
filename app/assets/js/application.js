@@ -183,7 +183,11 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
                     url: '/api/users/' + user.name + '/repositories'
                 })
                     .success(function(repositories) {
-                        repositories.forEach($scope.repositories.push, $scope.repositories);
+                        console.log(repositories);
+                        repositories.forEach(
+                            function(repository) {
+                                $scope.repositories.push(repository);
+                            });
                     });
             });
         });
