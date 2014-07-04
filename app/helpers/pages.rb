@@ -109,21 +109,21 @@ module LabPages
         end
 
         commits.each_with_index do |commit, key|
-          commit = [
+          c = [
               commit.sha,
-              commit.message.force_encoding('UTF-8'),
+              commit.message.encode('UTF-8'),
               commit.author.date,
-              commit.author.name.force_encoding('UTF-8'),
+              commit.author.name.encode('UTF-8'),
               Digest::MD5.hexdigest(commit.author.email)
           ]
 
           if key == 0
-            status[:refs][:remote] = commit
+            status[:refs][:remote] = c
           else
             if key === (commits.count - 1)
-              status[:refs][:deployed] = commit
+              status[:refs][:deployed] = c
             else
-              status[:refs][:commits].push(commit)
+              status[:refs][:commits].push(c)
             end
           end
         end
