@@ -4,8 +4,8 @@ var labpages = angular
         return LabPages;
     })
     .factory('pinger', function($rootScope, config) {
-        var ping = function (done, fail, always) {
-            $.ajax({ url: '/api/ping', timeout: 10000 })
+        var ping = function (url, done, fail, always) {
+            $.ajax({ url: url, timeout: 10000 })
                 .done(done || function () {})
                 .fail(fail || function () {})
                 .error(fail || function () {})
@@ -13,24 +13,25 @@ var labpages = angular
         };
 
         return {
+            intervalId: [],
             interval: config.interval || 60000,
 
-            start: function (done, fail, always) {
-                this.intervalId = setInterval(
+            start: function (url, done, fail, always) {
+                this.intervalId[url] = setInterval(
                     function () {
-                        ping(done, fail, always);
+                        ping(url, done, fail, always);
                     },
                     this.interval
                 );
 
-                ping(done, fail, always);
+                ping(url, done, fail, always);
 
                 return this;
             },
 
-            stop: function () {
-                if(this.intervalId !== undefined) {
-                    clearInterval(this.intervalId);
+            stop: function (url) {
+                if(this.intervalId[url] !== undefined) {
+                    clearInterval(this.intervalId[url]);
                 }
 
                 return this;
@@ -126,18 +127,44 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
         up: false
     };
 
+    $scope.redis = {
+        up: false
+    };
+
     pinger.start(
-        function() {
+        '/api/ping',
+        function(response) {
             $scope.$apply(function() {
                 $scope.hook = {
-                    up: true,
-                    time: new Date().toLocaleString()
+                    up: response.up,
+                    time: new Date().toLocaleString(),
+                    data: response
                 };
             });
         },
         function() {
             $scope.$apply(function() {
                 $scope.hook = {
+                    up: false,
+                    time: new Date().toLocaleString()
+                };
+            });
+        }
+    );
+
+    pinger.start(
+        '/api/ping/redis',
+        function(response) {
+            $scope.$apply(function() {
+                $scope.redis = {
+                    up: response.up,
+                    time: new Date().toLocaleString()
+                };
+            });
+        },
+        function() {
+            $scope.$apply(function() {
+                $scope.redis = {
                     up: false,
                     time: new Date().toLocaleString()
                 };
@@ -200,16 +227,5 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
             .success(function() {
                 $(event.target).toggleClass('disabled');
             });
-    };
-
-    $scope.more = function(scope, event) {
-        event.preventDefault();
-
-        $(event.target).nextAll('.commit').toggle();
-    };
-
-    $scope.refresh = function(scope, event) {
-        event.preventDefault();
-
     };
 }

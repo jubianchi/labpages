@@ -8,22 +8,50 @@ module LabPages
     module API
       def self.registered(app)
         app.get '/api/ping/?' do
-          stats = Sidekiq::Stats.new
-          @failed = stats.failed
-          @processed = stats.processed
-
           content_type :json
 
-          {
-              :message => 'LabPages Web Hook is up and running :-)',
-              :sidekiq => {
-                :failed => stats.failed,
-                :processed => stats.processed
-              }
-          }.to_json
+          begin
+            stats = Sidekiq::Stats.new
+
+            {
+                :message => 'LabPages Web Hook is up and running :-)',
+                :up => true,
+                :sidekiq => {
+                    :failed => stats.failed,
+                    :processed => stats.processed - stats.failed
+                }
+            }
+          rescue Exception => msg
+            {
+                :message => 'LabPages Web Hook is down :\'(',
+                :error => msg,
+                :up => false
+            }
+          end.to_json
+        end
+
+        app.get '/api/ping/redis/?' do
+          content_type :json
+
+          begin
+            Redis.new.ping
+
+            {
+                :message => 'Redis server is up and running :-)',
+                :up => true
+            }
+          rescue Exception => msg
+            {
+                :message => 'Redis server is down :\'(',
+                :error => msg,
+                :up => false
+            }
+          end.to_json
         end
 
         app.get '/api/users/?' do
+          content_type :json
+
           users = []
 
           Dir.foreach(app.settings.config['repo_dir']) do |user|
@@ -31,18 +59,19 @@ module LabPages
 
             if File.directory?(File.join(app.settings.config['repo_dir'], user))
               user = {
-                  'name' => user
+                  :name => user
               }
 
               users.push(user)
             end
           end
 
-          content_type :json
           users.to_json
         end
 
         app.get '/api/users/:owner/repositories/?' do |owner|
+          content_type :json
+
           repositories = []
 
           Dir.foreach(File.join(app.settings.config['repo_dir'], owner)) do |repository|
@@ -51,12 +80,12 @@ module LabPages
             repositories.push(info(app.settings.config['repo_dir'], owner, repository))
           end
 
-          content_type :json
           repositories.to_json
         end
 
         app.get '/api/users/:owner/repositories/:repository/?' do |owner, repository|
           content_type :json
+
           info(app.settings.config['repo_dir'], owner, repository).to_json
         end
 

@@ -31,8 +31,8 @@ module LabPages
                       fetch_all.each do |repository|
                         ws.send(
                             {
-                                'type' => 'repository',
-                                'content' => repository
+                                :type => 'repository',
+                                :content => repository
                             }.to_json
                         )
                       end

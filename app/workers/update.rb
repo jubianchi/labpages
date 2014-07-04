@@ -17,8 +17,8 @@ class UpdateWorker
 
     client.send(
       {
-        'type' => 'update',
-        'content' => info(dir, owner, repository)
+        :type => 'update',
+        :content => info(dir, owner, repository)
       }.to_json
     )
   end

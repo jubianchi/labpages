@@ -23,7 +23,10 @@
 
         <div class="alert" ng-class="{'alert-success': hook.up, 'alert-danger': !hook.up}">
             <div class="clearfix">
-                <h6 class="pull-left">LabPages Web Hook</h6>
+                <h6 class="pull-left">
+                  LabPages Web Hook<br/>
+                  <small ng-show="hook.up"><span class="text-danger">{{hook.data.sidekiq.failed}} failed</span> / {{hook.data.sidekiq.processed}} processed</small>
+                </h6>
                 <p class="status pull-right" ng-show="hook.up">
                   <small>Last ping on {{hook.time}}</small>
                 </p>
@@ -41,6 +44,15 @@
                 </p>
             </div>
         </div>
+
+        <div class="alert" ng-class="{'alert-success': redis.up, 'alert-danger': !redis.up}">
+            <div class="clearfix">
+                <h6 class="pull-left">Redis Server</h6>
+                <p class="status pull-right" ng-show="redis.up">
+                    <small>Last ping on {{hook.time}}</small>
+                </p>
+            </div>
+      </div>
 
         <hr/>
 
@@ -74,11 +86,11 @@
                     </div>
                 </div>
 
-                <a class="btn btn-default btn-more" ng-click="more(this, $event)" ng-show="repository.refs.commits.length && repository.refs.commits.length > 1">
+                <a class="btn btn-default btn-more" ng-init="more=false" ng-click="more=!more" ng-show="repository.refs.commits.length && repository.refs.commits.length > 1">
                     <strong>{{repository.refs.commits.length}} more commits...</strong>
                 </a>
 
-                <div ng-repeat="commit in repository.refs.commits" class="well" ng-class="{'commit': repository.refs.commits.length && repository.refs.commits.length > 1}">
+                <div ng-repeat="commit in repository.refs.commits" class="well" ng-show="more || repository.refs.commits.length == 1">
                     <div class="row">
                         <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{commit[4]}}"/>
                         <p class="pull-left">
@@ -126,7 +138,7 @@
         <hr/>
 
         <p style="text-align: center">
-            <a data-toggle="modal" href="#howto" class="btn btn-link">How to enable ?</a>
+            <a data-toggle="modal" href="#howto" class="btn btn-default">How to enable ?</a>
         </p>
     </div>
 

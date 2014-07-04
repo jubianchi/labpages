@@ -6,29 +6,41 @@ require 'redis'
 module LabPages
   module Helpers
     module Pages
-      @@redis = Redis.new
+      def redis
+        Redis.new
+      end
 
       def store(repository)
-        slug = repository['owner'] + '/' + repository['name']
+        slug = repository[:owner] + '/' + repository[:name]
+        repositories = begin
+          JSON.parse(@redis.get('labpages:repositories'))
+        rescue
+          []
+        end
 
-        repositories = JSON.parse(@@redis.get('labpages:repositories') || '[]')
         repositories << slug unless repositories.include?(slug)
-        @@redis.set('labpages:repositories', repositories.to_json)
-
-        @@redis.set(
-            'labpages:' + slug,
-            repository.to_json
-        )
+        self.redis.set('labpages:repositories', repositories.to_json)
+        self.redis.set('labpages:' + slug, repository.to_json)
       end
 
       def fetch(owner, repository)
-        JSON.parse(@@redis.get('labpages:' + owner + '/' + repository))
+        begin
+          JSON.parse(self.redis.get('labpages:' + owner + '/' + repository))
+        rescue
+          {}
+        end
       end
 
       def fetch_all()
         repositories = []
-        JSON.parse(@@redis.get('labpages:repositories') || '[]').each do |slug|
-          repositories << JSON.parse(@@redis.get('labpages:' + slug))
+        slugs = begin
+          JSON.parse(self.redis.get('labpages:repositories'))
+        rescue
+          []
+        end
+
+        slugs.each do |slug|
+          repositories << JSON.parse(self.redis.get('labpages:' + slug))
         end
 
         repositories
@@ -69,19 +81,24 @@ module LabPages
       def info(dir, owner, repository)
         path = File.join(dir, owner, repository)
         status = {
-            'owner' => owner,
-            'name' => repository,
-            'refs' => {
-                'deployed' => nil,
-                'remote' => nil,
-                'commits' => [],
+            :owner => owner,
+            :name => repository,
+            :refs => {
+                :deployed => nil,
+                :remote => nil,
+                :commits => [],
             }
         }
 
         repo = Git.open(path, :log => Logger.new(STDOUT))
         repo.remote('origin').fetch
 
-        commits = repo.log.between('HEAD~', 'origin/gl-pages')
+        begin
+          commits = repo.log.between('HEAD~', 'origin/gl-pages')
+        rescue
+          commits = 0
+        end
+
         if commits.count <= 1
           commits = [repo.gcommit('HEAD'), repo.gcommit('HEAD')]
         end
@@ -96,12 +113,12 @@ module LabPages
           ]
 
           if key == 0
-            status['refs']['remote'] = commit
+            status[:refs][:remote] = commit
           else
             if key === (commits.count - 1)
-              status['refs']['deployed'] = commit
+              status[:refs][:deployed] = commit
             else
-              status['refs']['commits'].push(commit)
+              status[:refs][:commits].push(commit)
             end
           end
         end
