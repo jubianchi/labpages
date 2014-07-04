@@ -91,7 +91,12 @@ module LabPages
         }
 
         repo = Git.open(path, :log => Logger.new(STDOUT))
-        repo.remote('origin').fetch
+
+        begin
+          repo.remote('origin').fetch
+        rescue Exception => exception
+          puts exception
+        end
 
         begin
           commits = repo.log.between('HEAD~', 'origin/gl-pages')
