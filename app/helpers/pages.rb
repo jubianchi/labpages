@@ -113,7 +113,7 @@ module LabPages
               commit.sha,
               commit.message.encode('UTF-8'),
               commit.author.date,
-              commit.author.name.encode('UTF-8'),
+              commit.author.email,
               Digest::MD5.hexdigest(commit.author.email)
           ]
 

@@ -19,7 +19,7 @@ module LabPages
 
               ws.onmessage do |message|
                 EM.next_tick do
-                    message = JSON.parse(message.force_encoding('UTF-8'))
+                    message = JSON.parse(message)
 
                     if message['type'] == 'update'
                       app.settings.sockets.each do |socket|
@@ -33,7 +33,7 @@ module LabPages
                             {
                                 :type => 'repository',
                                 :content => repository
-                            }.to_json.encode('UTF-8')
+                            }.to_json
                         )
                       end
                     end
