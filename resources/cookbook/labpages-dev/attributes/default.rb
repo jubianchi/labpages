@@ -1,0 +1,1 @@
+default['labpages-dev']['redis']['commander']['port'] = 8282

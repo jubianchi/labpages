@@ -1,9 +1,0 @@
-Vagrant.configure("1") do |config|
-  config.vm.box = "vm-wheezy"
-  config.vm.host_name = "vm-wheezy"
-  config.vagrant.host = "vm-wheezy"
-
-  config.vm.box_url = "./wheezy.box"
-  
-  config.vm.network :hostonly, "192.168.50.5"
-end

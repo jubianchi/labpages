@@ -1,4 +1,0 @@
-spawn bundle exec rake gitlab:backup:restore
-expect "Do you want to continue (yes/no)?"
-send -- "yes\r"
-expect eof

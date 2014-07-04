@@ -1,11 +1,7 @@
-Vagrantfile
 config/config.yml
 config/sidekiq.yml
-config/nginx.conf
-
-.vagrant
-packer_cache
-*.box
-cookbooks
+.vagrant/
+.bundle/
+vendor/
 
 

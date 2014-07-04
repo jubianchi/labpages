@@ -1,4 +1,4 @@
-name             'labpages'
+name             'labpages-dev'
 maintainer       'Julien Bianchi'
 maintainer_email 'contact@jubianchi.fr'
 version          '1.0.0'
@@ -6,8 +6,5 @@ license          'MIT'
 
 supports         'debian', '>= 6.0.0'
 
-depends          'apt'
+depends          'npm'
 
-recipe           'labpages', ''
-recipe           'labpages::nginx', ''
-recipe           'labpages::ruby', ''

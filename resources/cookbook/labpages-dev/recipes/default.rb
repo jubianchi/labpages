@@ -19,24 +19,11 @@ cookbook_file "/home/#{node['labpages']['git_user']}/.ssh/config" do
   mode 0700
 end
 
-npm_package "redis-commander" do
-  action :install
-  not_if 'which redis-commander'
-end
+include_recipe 'labpages-dev::gitlab'
+include_recipe 'labpages-dev::redis'
+include_recipe 'labpages-dev::services'
 
-execute 'start_redis_commander' do
-  command "redis-commander -p #{node['labpages']['redis']['commander']['port']} > /dev/null 2>&1 &"
 
-  action :run
-end
-
-include_recipe 'labpages::dev_redis'
-include_recipe 'labpages::dev_gitlab'
-include_recipe 'labpages::dev_fixtures'
-
-service 'labpages' do
-  action :start
-end
 
 
 
