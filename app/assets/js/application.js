@@ -182,8 +182,8 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
                     method: 'GET',
                     url: '/api/users/' + user.name + '/repositories'
                 })
-                    .success(function(repository) {
-                        $scope.repositories.push(repository);
+                    .success(function(repositories) {
+                        $scope.repositories.concat(repositories);
                     });
             });
         });
@@ -197,7 +197,7 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
                 time: new Date().toLocaleString()
             };
 
-            socket.emit('repositories');
+            //socket.emit('repositories');
         })
         .on(['close', 'error'], function (e) {
             $scope.socket = {
