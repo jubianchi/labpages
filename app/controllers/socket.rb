@@ -19,7 +19,7 @@ module LabPages
 
               ws.onmessage do |message|
                 EM.next_tick do
-                    message = JSON.parse(message)
+                    message = JSON.parse(message.force_encoding('UTF-8'))
 
                     if message['type'] == 'update'
                       app.settings.sockets.each do |socket|

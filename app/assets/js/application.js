@@ -196,8 +196,6 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
                 connected: true,
                 time: new Date().toLocaleString()
             };
-
-            //socket.emit('repositories');
         })
         .on(['close', 'error'], function (e) {
             $scope.socket = {
@@ -209,7 +207,7 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
                 $('#reconnect').removeClass('disabled');
             }
         })
-        .on(['repository', 'update'], function (message) {
+        .on('update', function (message) {
             var updated = false;
 
             $scope.socket.time = new Date().toLocaleString();
