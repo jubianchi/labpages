@@ -186,8 +186,6 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
                         $scope.repositories.push(repository);
                     });
             });
-
-
         });
 
 
@@ -199,7 +197,7 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
                 time: new Date().toLocaleString()
             };
 
-            //socket.emit('repositories');
+            socket.emit('repositories');
         })
         .on(['close', 'error'], function (e) {
             $scope.socket = {

@@ -23,7 +23,7 @@ module LabPages
 
                     if message['type'] == 'update'
                       app.settings.sockets.each do |socket|
-                        socket.send(message.to_json)
+                        socket.send(message.to_json.force_encoding('UTF-8'))
                       end
                     end
 
@@ -33,7 +33,7 @@ module LabPages
                             {
                                 :type => 'repository',
                                 :content => repository
-                            }.to_json
+                            }.to_json.force_encoding('UTF-8')
                         )
                       end
                     end
