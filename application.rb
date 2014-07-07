@@ -5,6 +5,7 @@ require 'sinatra/assetpack'
 require 'less'
 
 require_relative 'app/helpers/pages.rb'
+require_relative 'app/helpers/redis.rb'
 require_relative 'app/workers.rb'
 
 require_relative 'app/controllers/hook.rb'
@@ -60,8 +61,6 @@ module LabPages
       register LabPages::Controllers::Socket
     end
 
-    helpers do
-      include LabPages::Helpers::Pages
-    end
+    helpers LabPages::Helpers::Redis, LabPages::Helpers::Pages
   end
 end

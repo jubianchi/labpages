@@ -4,7 +4,7 @@ require 'web_socket/web_socket'
 require_relative '../helpers/pages.rb'
 require_relative '../helpers/redis.rb'
 
-class UpdateWorker
+class DeleteWorker
   include Sidekiq::Worker
   include LabPages::Helpers::Redis
   include LabPages::Helpers::Pages
@@ -12,6 +12,8 @@ class UpdateWorker
   sidekiq_options :queue => 'labpages'
 
   def perform(dir, owner, repository)
+    delete(dir, owner, repository)
+
     config_root = File.join(File.dirname(__FILE__), '..', '..', 'config')
     config = YAML.load_file(File.join(config_root, 'config.yml'))
 
@@ -19,8 +21,11 @@ class UpdateWorker
 
     client.send(
       {
-        :type => 'update',
-        :content => info(dir, owner, repository)
+        :type => 'delete',
+        :content => {
+            :owner => owner,
+            :name => repository
+        }
       }.to_json
     )
   end

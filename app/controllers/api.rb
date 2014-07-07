@@ -1,7 +1,7 @@
 require 'json'
 require 'sinatra'
 
-require_relative '../workers/deploy.rb'
+require_relative '../workers.rb'
 
 module LabPages
   module Controllers
@@ -22,6 +22,7 @@ module LabPages
                 }
             }
           rescue Exception => msg
+            status 503
             {
                 :message => 'LabPages Web Hook is down :\'(',
                 :error => msg,
@@ -41,6 +42,7 @@ module LabPages
                 :up => true
             }
           rescue Exception => msg
+            status 503
             {
                 :message => 'Redis server is down :\'(',
                 :error => msg,
@@ -49,48 +51,34 @@ module LabPages
           end.to_json
         end
 
+        app.get '/api/repositories/?' do
+          content_type :json
+
+          fetch_all.to_json
+        end
+
         app.get '/api/users/?' do
           content_type :json
 
-          users = []
-
-          Dir.foreach(app.settings.config['repo_dir']) do |user|
-            next if user == '.' or user == '..'
-
-            if File.directory?(File.join(app.settings.config['repo_dir'], user))
-              user = {
-                  :name => user
-              }
-
-              users.push(user)
-            end
-          end
-
-          users.to_json
+          fetch_users.to_json
         end
 
-        app.get '/api/users/:owner/repositories/?' do |owner|
+        app.get '/api/users/:user/?' do |user|
           content_type :json
 
-          repositories = []
-
-          Dir.foreach(File.join(app.settings.config['repo_dir'], owner)) do |repository|
-            next if repository == '.' or repository == '..'
-
-            repositories.push(info(app.settings.config['repo_dir'], owner, repository))
-          end
-
-          repositories.to_json
+          fetch_user(user).to_json
         end
 
-        app.get '/api/users/:owner/repositories/:repository/?' do |owner, repository|
-          content_type :json
-
-          info(app.settings.config['repo_dir'], owner, repository).to_json
+        app.get '/api/users/:owner/:repository/deploy/?' do |owner, repository|
+          DeployWorker.perform_async(app.settings.config['repo_dir'], owner, repository, params[:url]);
         end
 
-        app.get '/api/users/:owner/repositories/:repository/deploy/?' do |owner, repository|
-          DeployWorker.perform_async(app.settings.config['repo_dir'], owner, repository);
+        app.get '/api/users/:owner/:repository/update/?' do |owner, repository|
+          UpdateWorker.perform_async(app.settings.config['repo_dir'], owner, repository);
+        end
+
+        app.get '/api/users/:owner/:repository/delete/?' do |owner, repository|
+          DeleteWorker.perform_async(app.settings.config['repo_dir'], owner, repository);
         end
       end
     end

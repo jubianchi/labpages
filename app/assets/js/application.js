@@ -174,21 +174,11 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
 
     $http({
         method: 'GET',
-        url: '/api/users'
+        url: '/api/repositories'
     })
         .success(function(reponse) {
-            reponse.forEach(function(user) {
-                $http({
-                    method: 'GET',
-                    url: '/api/users/' + user.name + '/repositories'
-                })
-                    .success(function(repositories) {
-                        console.log(repositories);
-                        repositories.forEach(
-                            function(repository) {
-                                $scope.repositories.push(repository);
-                            });
-                    });
+            reponse.forEach(function(repository) {
+                $scope.repositories.push(repository);
             });
         });
 
@@ -226,6 +216,13 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
             if(updated === false) {
                 $scope.repositories.push(message.content);
             }
+        })
+        .on('delete', function (message) {
+            $scope.repositories.forEach(function(repository, key) {
+                if(repository.owner === message.content.owner && repository.name === message.content.name) {
+                    $scope.repositories.splice(key, 1);
+                }
+            });
         });
 
     $scope.reconnect = function(scope, event) {
@@ -241,7 +238,35 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
 
         $http({
             method: 'GET',
-            url: '/api/users/' + scope.repository.owner + '/repositories/' + scope.repository.name + '/deploy'
+            url: '/api/users/' + scope.repository.owner + '/' + scope.repository.name + '/deploy'
+        })
+            .success(function() {
+                $(event.target).toggleClass('disabled');
+            });
+    };
+
+    $scope.refresh = function(scope, event) {
+        event.preventDefault();
+
+        $(event.target).toggleClass('disabled');
+
+        $http({
+            method: 'GET',
+            url: '/api/users/' + scope.repository.owner + '/' + scope.repository.name + '/update'
+        })
+            .success(function() {
+                $(event.target).toggleClass('disabled');
+            });
+    };
+
+    $scope.delete = function(scope, event) {
+        event.preventDefault();
+
+        $(event.target).toggleClass('disabled');
+
+        $http({
+            method: 'GET',
+            url: '/api/users/' + scope.repository.owner + '/' + scope.repository.name + '/delete'
         })
             .success(function() {
                 $(event.target).toggleClass('disabled');

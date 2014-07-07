@@ -25,7 +25,10 @@
             <div class="clearfix">
                 <h6 class="pull-left">
                   LabPages Web Hook<br/>
-                  <small ng-show="hook.up"><span class="text-danger">{{hook.data.sidekiq.failed}} failed</span> / {{hook.data.sidekiq.processed}} processed</small>
+                  <small ng-show="hook.up">
+                    <a href="/sidekiq" class="text-success">Sidekiq</a>:
+                    <span class="text-danger">{{hook.data.sidekiq.failed}} failed</span> / {{hook.data.sidekiq.processed}} processed
+                  </small>
                 </h6>
                 <p class="status pull-right" ng-show="hook.up">
                   <small>Last ping on {{hook.time}}</small>
@@ -61,8 +64,13 @@
                 <h3 class="panel-title pull-left">
                     <a ng-href="//{{repository.owner}}.{{application.domain}}/{{repository.name}}">{{repository.owner}}/{{repository.name}}</a>
                 </h3>
-                <small class="pull-right">
+                <small style="color: #89C28A">
                     {{repository.time}}
+                </small>
+                <small class="pull-right">
+                    <a href="#" ng-click="refresh(this, $event)"><i class="icon icon-refresh icon-large"></i></a>
+                    <a href="#" ng-click="delete(this, $event)"><i class="icon icon-trash icon-large"></i></a>
+                    <a href="#" ng-show="repository.refs.deployed[0] != repository.refs.remote[0]" ng-click="deploy(this, $event)"><i class="icon icon-cloud-upload icon-large"></i></a>
                 </small>
             </div>
 
@@ -128,10 +136,6 @@
             <div ng-show="!repository.refs.deployed || !repository.refs.remote">
                 <p>Can't determine page status...</p>
                 <pre>{{repository.error}}</pre>
-            </div>
-
-            <div class="panel-footer clearfix" ng-show="repository.refs.deployed[0] != repository.refs.remote[0]">
-                <a href="#" class="btn btn-small btn-success pull-right deploy" ng-click="deploy(this, $event)">Deploy</a>
             </div>
         </div>
 

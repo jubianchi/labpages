@@ -7,8 +7,6 @@ require_relative '../helpers/pages.rb'
 module LabPages
   module Controllers
     module Socket
-      include LabPages::Helpers::Pages
-
       def self.registered(app)
         app.get '/socket/?' do
           if request.websocket?
@@ -22,6 +20,12 @@ module LabPages
                     message = JSON.parse(message)
 
                     if message['type'] == 'update'
+                      app.settings.sockets.each do |socket|
+                        socket.send(message.to_json)
+                      end
+                    end
+
+                    if message['type'] == 'delete'
                       app.settings.sockets.each do |socket|
                         socket.send(message.to_json)
                       end

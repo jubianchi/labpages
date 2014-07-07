@@ -1,49 +1,39 @@
 require 'yaml'
 require 'open4'
 require 'git'
-require 'redis'
 
 module LabPages
   module Helpers
     module Pages
-      def redis
-        Redis.new
-      end
-
       def store(repository)
         slug = repository[:owner] + '/' + repository[:name]
         repositories = begin
-          JSON.parse(@redis.get('labpages:repositories'))
+          JSON.parse(redis.get('labpages:repositories'))
         rescue
           []
         end
 
         repositories << slug unless repositories.include?(slug)
-        self.redis.set('labpages:repositories', repositories.to_json)
-        self.redis.set('labpages:' + slug, repository.to_json)
+        redis.set('labpages:repositories', repositories.to_json)
+        redis.set('labpages:' + slug, repository.to_json)
       end
 
-      def fetch(owner, repository)
-        begin
-          JSON.parse(self.redis.get('labpages:' + owner + '/' + repository))
-        rescue
-          {}
-        end
-      end
+      def delete(dir, owner, repository)
+        slug = owner + '/' + repository
+        repo_dir = File.join(dir, owner, repository)
 
-      def fetch_all()
-        repositories = []
-        slugs = begin
-          JSON.parse(self.redis.get('labpages:repositories'))
+        FileUtils.rm_rf(repo_dir)
+
+        redis.del('labpages:' + slug)
+
+        repositories = begin
+          JSON.parse(redis.get('labpages:repositories'))
         rescue
           []
         end
 
-        slugs.each do |slug|
-          repositories << JSON.parse(self.redis.get('labpages:' + slug))
-        end
-
-        repositories
+        repositories.delete(slug) if repositories.include?(slug)
+        redis.set('labpages:repositories', repositories.to_json)
       end
 
       def deploy(dir, owner, repository, url = nil)
@@ -76,6 +66,8 @@ module LabPages
         if File.exists? config
           `cd #{path} && jekyll build`
         end
+
+        info(dir, owner, repository)
       end
 
       def info(dir, owner, repository)

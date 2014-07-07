@@ -1,10 +1,12 @@
 require 'sidekiq/worker'
 
+require_relative '../helpers/redis.rb'
 require_relative '../helpers/pages.rb'
 require_relative './update.rb'
 
 class DeployWorker
   include Sidekiq::Worker
+  include LabPages::Helpers::Redis
   include LabPages::Helpers::Pages
 
   sidekiq_options :queue => 'labpages'

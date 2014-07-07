@@ -5,8 +5,6 @@ require_relative '../helpers/pages.rb'
 module LabPages
   module Controllers
     module Static
-      include LabPages::Helpers::Pages
-
       def self.registered(app)
         app.not_found do
           @logo = app.settings.config['logo_src']

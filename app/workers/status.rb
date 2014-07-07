@@ -1,13 +1,11 @@
 require 'sidekiq/worker'
 require 'sidetiq'
 
-require_relative '../helpers/pages.rb'
 require_relative './update.rb'
 
 class StatusWorker
   include Sidekiq::Worker
   include Sidetiq::Schedulable
-  include LabPages::Helpers::Pages
 
   sidekiq_options :queue => 'labpages'
 
