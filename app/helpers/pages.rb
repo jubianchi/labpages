@@ -62,9 +62,13 @@ module LabPages
         end
 
         config = File.join(path, '_config.yml')
-        puts config
         if File.exists? config
           `cd #{path} && jekyll build`
+        end
+
+        config = File.join(path, 'conf.py')
+        if File.exists? config
+          `cd #{path} && sphinx-build -b html . _site`
         end
 
         info(dir, owner, repository)
@@ -136,6 +140,11 @@ module LabPages
           if config['destination']
             path = File.join(dir, owner, repository, config['destination'], request)
           end
+        end
+
+        config = File.join(dir, owner, repository, 'conf.py')
+        if File.exists? config
+          path = File.join(dir, owner, repository, '_site', request)
         end
 
         if File.directory?(path)
