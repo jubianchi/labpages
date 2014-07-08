@@ -108,34 +108,53 @@ var labpages = angular
 
                 return this;
             }
-        };
+        }
     })
     .filter('substr', function() {
         return function(input, start, length) {
             return input.substr(start, length);
         }
     })
-    .filter('fromNow', function() {
-        return function(input) {
-            console.log(input, moment(input).fromNow());
+    .directive('moment', [
+        '$timeout',
+        function($timeout) {
+            return {
+                restrict: 'E',
+                template: '<time>{{fromNow}}</time>',
+                link: function(scope, element, attrs) {
+                    var update = function() {
+                        var datetime = scope.$eval(attrs.datetime);
 
-            return moment(input).fromNow();
+                        if(datetime) {
+                            element.text(moment(datetime).fromNow());
+                            unwatch();
+                        }
+
+                        $timeout(update, 10000);
+                    };
+
+                    var unwatch = scope.$watch(attrs.datetime, update);
+                }
+            }
         }
-    });
+    ]);
 
 function LabPagesCtrl($scope, $http, socket, pinger, config) {
     $scope.application = config;
     $scope.repositories = [];
     $scope.socket = {
-        connected: false
+        connected: false,
+        time: false
     };
 
     $scope.hook = {
-        up: false
+        up: false,
+        time: false
     };
 
     $scope.redis = {
-        up: false
+        up: false,
+        time: false
     };
 
     pinger.start(

@@ -43,8 +43,9 @@ module LabPages
         serve '/css', from: 'app/assets/less'      # Default
 
         js :appjs, '/js/app.js', [
-          '/js/jquery.js',
-          '/js/angular.js'
+          '/js/angular.js',
+          '/js/moment.js',
+          '/js/application.js'
         ]
 
         css :appcss, '/css/app.css', [
