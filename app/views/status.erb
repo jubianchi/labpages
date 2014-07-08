@@ -68,22 +68,22 @@
                     <moment datetime="repository.time"></moment>
                 </small>
                 <small class="pull-right">
-                    <a href="#" ng-show="repository.log" ng-click="showLog = !showLog"><i class="icon icon-file-text icon-large"></i></a>
-                    <a href="#" ng-click="refresh(this, $event)"><i class="icon icon-refresh icon-large"></i></a>
-                    <a href="#" ng-click="delete(this, $event)"><i class="icon icon-trash icon-large"></i></a>
-                    <a href="#" ng-show="repository.refs.deployed[0] != repository.refs.remote[0]" ng-click="deploy(this, $event)"><i class="icon icon-cloud-upload icon-large"></i></a>
+                    <span>{{label}}</span>
+                    <a ng-mouseleave="label = ''" ng-mouseover="label = 'Log'" ng-show="repository.log" ng-click="showLog = !showLog"><i class="icon icon-file-text icon-large"></i></a>
+                    <a ng-mouseleave="label = ''" ng-mouseover="label = 'Refresh'" ng-click="refresh(this, $event)"><i class="icon icon-refresh icon-large"></i></a>
+                    <a ng-mouseleave="label = ''" ng-mouseover="label = 'Delete'" ng-click="delete(this, $event)"><i class="icon icon-trash icon-large"></i></a>
+                    <a ng-mouseleave="label = ''" ng-mouseover="label = 'Deploy'" ng-show="repository.refs.deployed[0] != repository.refs.remote[0]" ng-click="deploy(this, $event)"><i class="icon icon-cloud-upload icon-large"></i></a>
                 </small>
             </div>
 
             <div ng-show="showLog">
-                <pre><code>{{repository.log}}</code></pre>
+                <h6>Log</h6>
+                <pre class="log">{{repository.log}}</pre>
             </div>
 
             <div ng-hide="showLog">
                 <div ng-show="repository.refs.remote && (!repository.refs.deployed || repository.refs.remote[0] != repository.refs.deployed[0])">
-                    <h6>
-                        Remote
-                    </h6>
+                    <h6>Remote</h6>
 
                     <div class="well">
                         <div class="row">
@@ -120,9 +120,7 @@
                     </div>
                 </div>
 
-                <h6 ng-show="repository.refs.deployed">
-                    Deployed
-                </h6>
+                <h6 ng-show="repository.refs.deployed">Deployed</h6>
 
                 <div ng-show="repository.refs.deployed" class="well">
                     <div class="row">

@@ -1,6 +1,10 @@
 @import "bootstrap/bootstrap.less";
 @import "font-awesome/font-awesome.less";
 
+a[ng-click], a[data-ng-click] {
+  cursor: pointer;
+}
+
 .container-narrow {
   max-width: 700px;
   margin: 0 auto;
@@ -15,21 +19,6 @@
     -webkit-box-shadow: none;
     box-shadow: none;
   }
-}
-
-.panel-success .panel-title a {
-  color: @panel-success-text;
-  text-decoration: none;
-}
-
-.panel-danger .panel-title a {
-  color: @panel-danger-text;
-  text-decoration: none;
-}
-
-.panel-warning .panel-title a {
-  color: @panel-warning-text;
-  text-decoration: none;
 }
 
 .well {
@@ -64,26 +53,25 @@
       font-size: 0.5em;
     }
   }
-}
 
-.alert-success {
-  border-color: @alert-success-border;
+  &-success {
+    border-color: @alert-success-border;
 
-  h6 small {
-    color: @alert-success-text;
+    h6 small {
+      color: @alert-success-text;
+    }
   }
-}
 
-.alert-danger {
-  border-color: @alert-danger-border;
+  &-danger {
+    border-color: @alert-danger-border;
 
-  h6 small {
-    color: @alert-danger-text;
+    h6 small {
+      color: @alert-danger-text;
+    }
   }
 }
 
 pre.log {
-  display: none;
   max-height: 250px;
   overflow: auto;
 }
@@ -105,22 +93,43 @@ pre.log {
   small, small a {
     padding-left: 5px;
   }
-}
 
-.panel-success .panel-heading {
-  small, small a {
-    color: #89C28A;
+  &-success {
+    .panel-heading {
+      small, small a {
+        color: #89C28A;
+      }
+    }
+
+    .panel-title a {
+      color: @panel-success-text;
+      text-decoration: none;
+    }
   }
-}
 
-.panel-danger .panel-heading {
-  small, small a {
-    color: #DCA4A3;
+  &-danger {
+    .panel-heading {
+      small, small a {
+        color: #DCA4A3;
+      }
+    }
+
+    .panel-title a {
+      color: @panel-danger-text;
+      text-decoration: none;
+    }
   }
-}
 
-.panel-warning .panel-heading {
-  small, small a {
-    color: #E2D0B1;
+  &-warning {
+    .panel-heading {
+      small, small a {
+        color: #E2D0B1;
+      }
+    }
+
+    .panel-title a {
+      color: @panel-warning-text;
+      text-decoration: none;
+    }
   }
 }
