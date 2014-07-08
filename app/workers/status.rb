@@ -9,7 +9,7 @@ class StatusWorker
 
   sidekiq_options :queue => 'labpages'
 
-  recurrence { minutely }
+  recurrence { hourly.minute_of_hour(0, 15, 30, 45) }
 
   def perform()
     config_root = File.join(File.dirname(__FILE__), '..', '..', 'config')

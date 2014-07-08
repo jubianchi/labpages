@@ -14,7 +14,7 @@ var labpages = angular
 
         return {
             intervalId: [],
-            interval: config.interval || 60000,
+            interval: config.interval || (60 * 5) * 1000,
 
             start: function (url, done, fail, always) {
                 this.intervalId[url] = setInterval(
