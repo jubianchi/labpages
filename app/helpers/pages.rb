@@ -16,6 +16,8 @@ module LabPages
         repositories << slug unless repositories.include?(slug)
         redis.set('labpages:repositories', repositories.to_json)
         redis.set('labpages:' + slug, repository.to_json)
+
+        repository
       end
 
       def delete(dir, owner, repository)
@@ -41,40 +43,55 @@ module LabPages
         user_home = File.join(dir, owner)
         path = File.join(user_home, repository)
 
+        strio = StringIO.new
+        log = Logger.new(strio)
+
         if File.exist? path
-          logger.info("Updating #{owner}/#{repository}...")
+          log.info("Updating #{owner}/#{repository}...")
 
-          repo = Git.open(path, :log => Logger.new(STDOUT))
-          repo.remote('origin').fetch
-          repo.reset_hard('origin/' + branch)
+          begin
+            repo = Git.open(path, :log => log)
+            repo.remote('origin').fetch
+            repo.reset_hard('origin/' + branch)
 
-          logger.info('Successfully updated repository!')
+            log.info('Successfully updated repository!')
+          rescue Exception => exception
+            log.error(exception)
+          end
         else
           if url != nil
-            logger.info("Cloning #{url}...")
+            log.info("Cloning #{url}...")
 
             Dir.mkdir(user_home) unless File.exist? user_home
-            repo = Git.clone(url, repository, :path => user_home)
-            repo.checkout('gl-pages')
 
-            logger.info('Successfully cloned repository!')
+            begin
+              repo = Git.clone(url, repository, :path => user_home)
+              repo.checkout('gl-pages')
+
+              log.info('Successfully cloned repository!')
+            rescue Exception => exception
+              log.error(exception)
+            end
           end
         end
 
         config = File.join(path, '_config.yml')
         if File.exists? config
-          `cd #{path} && jekyll build`
+          log.info(`cd #{path} && jekyll build`)
         end
 
         config = File.join(path, 'conf.py')
         if File.exists? config
-          `cd #{path} && sphinx-build -b html . _site`
+          log.info(`cd #{path} && sphinx-build -b html . _site`)
         end
 
-        info(dir, owner, repository)
+        info(dir, owner, repository, strio)
       end
 
-      def info(dir, owner, repository)
+      def info(dir, owner, repository, io = nil)
+        io ||= StringIO.new
+        log = Logger.new(io)
+
         path = File.join(dir, owner, repository)
         status = {
             :owner => owner,
@@ -83,20 +100,22 @@ module LabPages
                 :deployed => nil,
                 :remote => nil,
                 :commits => [],
-            }
+            },
+            :log => nil
         }
 
-        repo = Git.open(path, :log => Logger.new(STDOUT))
+        repo = Git.open(path, :log => Logger.new(io))
 
         begin
           repo.remote('origin').fetch
         rescue Exception => exception
-          puts exception
+          log.error(exception)
         end
 
         begin
           commits = repo.log.between('HEAD~', 'origin/gl-pages')
-        rescue
+        rescue Exception => exception
+          log.error(exception)
           commits = 0
         end
 
@@ -124,9 +143,9 @@ module LabPages
           end
         end
 
-        store(status)
+        status[:log] = io.string
 
-        status
+        store(status)
       end
 
       def serve(request, dir, owner, repository)

@@ -11,16 +11,23 @@ class UpdateWorker
 
   sidekiq_options :queue => 'labpages'
 
-  def perform(dir, owner, repository)
+  def perform(dir, owner = nil, repository = nil)
     config_root = File.join(File.dirname(__FILE__), '..', '..', 'config')
     config = YAML.load_file(File.join(config_root, 'config.yml'))
 
     client = WebSocket.new('ws://127.0.0.1:' + config['port'].to_s + '/socket')
 
+    if owner == nil || repository == nil
+      content = dir
+    else
+      content = info(dir, owner, repository)
+    end
+
+
     client.send(
       {
         :type => 'update',
-        :content => info(dir, owner, repository)
+        :content => content
       }.to_json
     )
   end

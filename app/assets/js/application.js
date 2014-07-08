@@ -121,6 +121,7 @@ var labpages = angular
             return {
                 restrict: 'E',
                 template: '<time>{{fromNow}}</time>',
+                replace: true,
                 link: function(scope, element, attrs) {
                     var update = function() {
                         var datetime = scope.$eval(attrs.datetime);

@@ -59,83 +59,90 @@
 
         <hr/>
 
-        <div ng-repeat="repository in repositories" class="panel" ng-class="{'panel-danger': !repository.refs.deployed || !repository.refs.remote, 'panel-success': repository.refs.deployed[0] == repository.refs.remote[0], 'panel-warning': repository.refs.deployed[0] != repository.refs.remote[0]}">
+        <div ng-repeat="repository in repositories" ng-init="showLog = false" class="panel" ng-class="{'panel-danger': !repository.refs.deployed || !repository.refs.remote, 'panel-success': repository.refs.deployed[0] == repository.refs.remote[0], 'panel-warning': repository.refs.deployed[0] != repository.refs.remote[0]}">
             <div class="panel-heading clearfix">
                 <h3 class="panel-title pull-left">
                     <a ng-href="//{{repository.owner}}.{{application.domain}}/{{repository.name}}">{{repository.owner}}/{{repository.name}}</a>
                 </h3>
-                <small style="color: #89C28A">
+                <small>
                     <moment datetime="repository.time"></moment>
                 </small>
                 <small class="pull-right">
+                    <a href="#" ng-show="repository.log" ng-click="showLog = !showLog"><i class="icon icon-file-text icon-large"></i></a>
                     <a href="#" ng-click="refresh(this, $event)"><i class="icon icon-refresh icon-large"></i></a>
                     <a href="#" ng-click="delete(this, $event)"><i class="icon icon-trash icon-large"></i></a>
                     <a href="#" ng-show="repository.refs.deployed[0] != repository.refs.remote[0]" ng-click="deploy(this, $event)"><i class="icon icon-cloud-upload icon-large"></i></a>
                 </small>
             </div>
 
-            <div ng-show="repository.refs.remote && (!repository.refs.deployed || repository.refs.remote[0] != repository.refs.deployed[0])">
-                <h6>
-                    Remote
+            <div ng-show="showLog">
+                <pre><code>{{repository.log}}</code></pre>
+            </div>
+
+            <div ng-hide="showLog">
+                <div ng-show="repository.refs.remote && (!repository.refs.deployed || repository.refs.remote[0] != repository.refs.deployed[0])">
+                    <h6>
+                        Remote
+                    </h6>
+
+                    <div class="well">
+                        <div class="row">
+                            <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{repository.refs.remote[4]}}"/>
+                            <p class="pull-left">
+                                <strong>{{repository.refs.remote[1]}}</strong><br/>
+                                <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.remote[3]}}">{{repository.refs.remote[3]}}</a> authored <moment datetime="repository.refs.remote[2]"></moment>
+                            </p>
+                            <div class="pull-right">
+                                <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{repository.refs.remote[0]}}">
+                                    <i class="icon icon-eye-open icon-large"></i> {{repository.refs.remote[0] | substr:0:9}}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a class="btn btn-default btn-more" ng-init="more=false" ng-click="more=!more" ng-show="repository.refs.commits.length && repository.refs.commits.length > 1">
+                        <strong>{{repository.refs.commits.length}} more commits...</strong>
+                    </a>
+
+                    <div ng-repeat="commit in repository.refs.commits" class="well" ng-show="more || repository.refs.commits.length == 1">
+                        <div class="row">
+                            <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{commit[4]}}"/>
+                            <p class="pull-left">
+                                <strong>{{commit[1]}}</strong><br/>
+                                <a ng-href="{{application.gitlabUrl}}/u/{{commit[3]}}">{{commit[3]}}</a> authored <moment datetime="commit[2]"></moment>
+                            </p>
+                            <div class="pull-right">
+                                <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{commit[0]}}">
+                                    <i class="icon icon-eye-open icon-large"></i> {{commit[0] | substr:0:9}}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 ng-show="repository.refs.deployed">
+                    Deployed
                 </h6>
 
-                <div class="well">
+                <div ng-show="repository.refs.deployed" class="well">
                     <div class="row">
-                        <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{repository.refs.remote[4]}}"/>
+                        <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{repository.refs.deployed[4]}}"/>
                         <p class="pull-left">
-                            <strong>{{repository.refs.remote[1]}}</strong><br/>
-                            <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.remote[3]}}">{{repository.refs.remote[3]}}</a> authored <moment datetime="repository.refs.remote[2]"></moment>
+                            <strong>{{repository.refs.deployed[1]}}</strong><br/>
+                            <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.deployed[3]}}">{{repository.refs.deployed[3]}}</a> authored <moment datetime="repository.refs.deployed[2]"></moment>
                         </p>
                         <div class="pull-right">
-                            <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{repository.refs.remote[0]}}">
-                                <i class="icon icon-eye-open icon-large"></i> {{repository.refs.remote[0] | substr:0:9}}
+                            <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{repository.refs.deployed[0]}}">
+                              <i class="icon icon-eye-open icon-large"></i> {{repository.refs.deployed[0] | substr:0:9}}
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <a class="btn btn-default btn-more" ng-init="more=false" ng-click="more=!more" ng-show="repository.refs.commits.length && repository.refs.commits.length > 1">
-                    <strong>{{repository.refs.commits.length}} more commits...</strong>
-                </a>
-
-                <div ng-repeat="commit in repository.refs.commits" class="well" ng-show="more || repository.refs.commits.length == 1">
-                    <div class="row">
-                        <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{commit[4]}}"/>
-                        <p class="pull-left">
-                            <strong>{{commit[1]}}</strong><br/>
-                            <a ng-href="{{application.gitlabUrl}}/u/{{commit[3]}}">{{commit[3]}}</a> authored <moment datetime="commit[2]"></moment>
-                        </p>
-                        <div class="pull-right">
-                            <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{commit[0]}}">
-                                <i class="icon icon-eye-open icon-large"></i> {{commit[0] | substr:0:9}}
-                            </a>
-                        </div>
-                    </div>
+                <div ng-show="!repository.refs.deployed || !repository.refs.remote">
+                    <p>Can't determine page status...</p>
+                    <pre>{{repository.error}}</pre>
                 </div>
-            </div>
-
-            <h6 ng-show="repository.refs.deployed">
-                Deployed
-            </h6>
-
-            <div ng-show="repository.refs.deployed" class="well">
-                <div class="row">
-                    <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{repository.refs.deployed[4]}}"/>
-                    <p class="pull-left">
-                        <strong>{{repository.refs.deployed[1]}}</strong><br/>
-                        <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.deployed[3]}}">{{repository.refs.deployed[3]}}</a> authored <moment datetime="repository.refs.deployed[2]"></moment>
-                    </p>
-                    <div class="pull-right">
-                        <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{repository.refs.deployed[0]}}">
-                          <i class="icon icon-eye-open icon-large"></i> {{repository.refs.deployed[0] | substr:0:9}}
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div ng-show="!repository.refs.deployed || !repository.refs.remote">
-                <p>Can't determine page status...</p>
-                <pre>{{repository.error}}</pre>
             </div>
         </div>
 
