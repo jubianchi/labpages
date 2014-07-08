@@ -14,6 +14,7 @@
     </script>
     <%= js  :appjs %>
     <script src="/js/bootstrap.js"></script>
+    <script src="/js/moment.js"></script>
     <script src="/js/application.js"></script>
 </head>
 
@@ -31,7 +32,7 @@
                   </small>
                 </h6>
                 <p class="status pull-right" ng-show="hook.up">
-                  <small>Last ping on {{hook.time}}</small>
+                  <small>Last ping {{hook.time | fromNow}}</small>
                 </p>
             </div>
         </div>
@@ -43,7 +44,7 @@
                     <a id="reconnect" class="btn btn-small btn-success" ng-click="reconnect(this, $event)">Reconnect</a>
                 </p>
                 <p class="status pull-right" ng-show="socket.connected">
-                    <small>Last event on {{socket.time}}</small>
+                    <small>Last event {{socket.time | fromNow}}</small>
                 </p>
             </div>
         </div>
@@ -52,10 +53,10 @@
             <div class="clearfix">
                 <h6 class="pull-left">Redis Server</h6>
                 <p class="status pull-right" ng-show="redis.up">
-                    <small>Last ping on {{hook.time}}</small>
+                    <small>Last ping {{redis.time | fromNow}}</small>
                 </p>
             </div>
-      </div>
+        </div>
 
         <hr/>
 
@@ -65,7 +66,7 @@
                     <a ng-href="//{{repository.owner}}.{{application.domain}}/{{repository.name}}">{{repository.owner}}/{{repository.name}}</a>
                 </h3>
                 <small style="color: #89C28A">
-                    {{repository.time}}
+                    {{repository.time | fromNow}}
                 </small>
                 <small class="pull-right">
                     <a href="#" ng-click="refresh(this, $event)"><i class="icon icon-refresh icon-large"></i></a>
@@ -84,7 +85,7 @@
                         <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{repository.refs.remote[4]}}"/>
                         <p class="pull-left">
                             <strong>{{repository.refs.remote[1]}}</strong><br/>
-                            <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.remote[3]}}">{{repository.refs.remote[3]}}</a> authored {{repository.refs.remote[2]}}
+                            <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.remote[3]}}">{{repository.refs.remote[3]}}</a> authored {{repository.refs.remote[2] | fromNow}}
                         </p>
                         <div class="pull-right">
                             <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{repository.refs.remote[0]}}">
@@ -103,7 +104,7 @@
                         <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{commit[4]}}"/>
                         <p class="pull-left">
                             <strong>{{commit[1]}}</strong><br/>
-                            <a ng-href="{{application.gitlabUrl}}/u/{{commit[3]}}">{{commit[3]}}</a> authored {{commit[2]}}
+                            <a ng-href="{{application.gitlabUrl}}/u/{{commit[3]}}">{{commit[3]}}</a> authored {{commit[2] | fromNow}}
                         </p>
                         <div class="pull-right">
                             <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{commit[0]}}">
@@ -123,7 +124,7 @@
                     <img class="avatar pull-left" ng-src="http://www.gravatar.com/avatar/{{repository.refs.deployed[4]}}"/>
                     <p class="pull-left">
                         <strong>{{repository.refs.deployed[1]}}</strong><br/>
-                        <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.deployed[3]}}">{{repository.refs.deployed[3]}}</a> authored {{repository.refs.deployed[2]}}
+                        <a ng-href="{{application.gitlabUrl}}/u/{{repository.refs.deployed[3]}}">{{repository.refs.deployed[3]}}</a> authored {{repository.refs.deployed[2] | fromNow}}
                     </p>
                     <div class="pull-right">
                         <a class="btn btn-default" ng-href="{{application.gitlabUrl}}/{{repository.owner}}/{{repository.name}}/commit/{{repository.refs.deployed[0]}}">

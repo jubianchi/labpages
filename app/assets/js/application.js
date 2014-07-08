@@ -114,6 +114,13 @@ var labpages = angular
         return function(input, start, length) {
             return input.substr(start, length);
         }
+    })
+    .filter('fromNow', function() {
+        return function(input) {
+            console.log(input, moment(input).fromNow());
+
+            return moment(input).fromNow();
+        }
     });
 
 function LabPagesCtrl($scope, $http, socket, pinger, config) {
@@ -137,7 +144,7 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
             $scope.$apply(function() {
                 $scope.hook = {
                     up: response.up,
-                    time: new Date().toLocaleString(),
+                    time: new Date().toString(),
                     data: response
                 };
             });
@@ -146,7 +153,7 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
             $scope.$apply(function() {
                 $scope.hook = {
                     up: false,
-                    time: new Date().toLocaleString()
+                    time: new Date().toString()
                 };
             });
         }
@@ -158,7 +165,7 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
             $scope.$apply(function() {
                 $scope.redis = {
                     up: response.up,
-                    time: new Date().toLocaleString()
+                    time: new Date().toString()
                 };
             });
         },
@@ -166,7 +173,7 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
             $scope.$apply(function() {
                 $scope.redis = {
                     up: false,
-                    time: new Date().toLocaleString()
+                    time: new Date().toString()
                 };
             });
         }
@@ -188,13 +195,13 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
         .on('open', function () {
             $scope.socket = {
                 connected: true,
-                time: new Date().toLocaleString()
+                time: new Date().toString()
             };
         })
         .on(['close', 'error'], function (e) {
             $scope.socket = {
                 connected: false,
-                time: new Date().toLocaleString()
+                time: new Date().toString()
             };
 
             if(e === undefined) {
@@ -204,8 +211,8 @@ function LabPagesCtrl($scope, $http, socket, pinger, config) {
         .on('update', function (message) {
             var updated = false;
 
-            $scope.socket.time = new Date().toLocaleString();
-            message.content.time = new Date().toLocaleString();
+            $scope.socket.time = new Date().toString();
+            message.content.time = new Date().toString();
             $scope.repositories.forEach(function(repository, key) {
                 if(repository.owner === message.content.owner && repository.name === message.content.name) {
                     $scope.repositories[key] = message.content;
