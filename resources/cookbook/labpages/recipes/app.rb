@@ -36,7 +36,7 @@ execute 'bundle_app' do
   command "sudo -u #{node['labpages']['git_user']} -H bundle install --deployment"
 end
 
-template '/etc/init.d/labpages' do
+template "/etc/init.d/#{node['labpages']['app_name']}" do
   source 'init.d.erb'
   mode 0755
   variables(node['labpages'])

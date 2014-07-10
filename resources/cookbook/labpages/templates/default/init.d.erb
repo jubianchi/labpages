@@ -18,16 +18,22 @@ NAME="<%= @app_name %>"
 DESC="LabPages web hook"
 
 APP_ROOT="<%= @app_dir %>"
-APP_LOG="<%= @log_file %>"
+APP_LOG="<%= @log_dir %>"
+APP_PID="<%= @pid_dir %>"
+APP_CONFIG="<%= @config_dir %>"
 APP_USER="<%= @git_user %>"
+APP_PORT="<%= @port %>"
+APP_ENV=<%= @env %>
 
 LABPAGES_EXEC="bundle exec rackup"
-LABPAGES_PID_PATH="<%= @pid_dir %>/<%= @app_name %>.pid"
-LABPAGES_DAEMON_OPTS="-p <%= @port %> -P $LABPAGES_PID_PATH -E <%= @env %> $APP_ROOT/config.ru > <%= @log_file %> 2>&1 &"
+LABPAGES_PID_PATH="$APP_PID/${NAME}.pid"
+LABPAGES_LOG_PATH="$APP_LOG/${NAME}.log"
+LABPAGES_DAEMON_OPTS="-p $APP_PORT -P $LABPAGES_PID_PATH -E $APP_ENV $APP_ROOT/config.ru > $LABPAGES_LOG_PATH 2>&1 &"
 
 SIDEKIQ_EXEC="bundle exec sidekiq"
-SIDEKIQ_PID_PATH="<%= @sidekiq['pid_file'] %>"
-SIDEKIQ_DAEMON_OPTS="-d -C <%= @config_dir %>/sidekiq.yml -r <%= @app_dir %>/app/workers.rb -e <%= @env %>"
+SIDEKIQ_PID_PATH="$APP_PID/${NAME}_sidekiq.pid"
+SIDEKIQ_LOG_PATH="$APP_LOG/${NAME}_sidekiq.log"
+SIDEKIQ_DAEMON_OPTS="-d -C $APP_CONFIG/sidekiq.yml -r $APP_ROOT/app/workers.rb -e $APP_ENV > $SIDEKIQ_LOG_PATH 2>&1"
 
 execute() {
     cd $APP_ROOT
@@ -59,7 +65,7 @@ start_labpages() {
         return 1
     else
         if [ `whoami` = root ]; then
-            execute "$LABPAGES_EXEC $LABPAGES_DAEMON_OPTS > $APP_LOG 2>&1"
+            execute "$LABPAGES_EXEC $LABPAGES_DAEMON_OPTS > $LABPAGES_LOG_PATH 2>&1"
 
             echo -n "Starting $NAME"
 

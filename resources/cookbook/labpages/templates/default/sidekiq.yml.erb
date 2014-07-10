@@ -1,7 +1,7 @@
-:logfile:     <%= @log_file    || '/var/log/labpages/sidekiq.log' %>
-:pidfile:     <%= @pid_file    || '/var/run/labpages/sidekiq.pid' %>
-:verbose:     <%= @verbose     || true                            %>
-:concurrency: <%= @concurrency || 5                               %>
-:timeout:     <%= @timeout     || 10                              %>
+:logfile:     <%= @log_file %>
+:pidfile:     <%= @pid_file %>
+:verbose:     <%= @verbose %>
+:concurrency: <%= @concurrency %>
+:timeout:     <%= @timeout %>
 :queues:
   - [<%= @queue || 10 %>, <%= @concurrency || 5 %>]

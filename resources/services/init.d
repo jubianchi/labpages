@@ -17,21 +17,23 @@
 NAME="labpages"
 DESC="LabPages web hook"
 
-APP_ROOT="/home/git/labpages"
-APP_LOG="/var/log/labpages"
+APP_ROOT="/home/git/$NAME"
+APP_LOG="/var/log/$NAME"
+APP_PID="/var/run/$NAME"
 APP_CONFIG="$APP_ROOT/config"
 APP_USER="git"
 APP_PORT="8080"
 APP_ENV=production
 
 LABPAGES_EXEC="bundle exec rackup"
-LABPAGES_PID_PATH="/var/run/labpages/$NAME.pid"
-LABPAGES_LOG_PATH="$APP_LOG/labpages.log"
+LABPAGES_PID_PATH="$APP_PID/${NAME}.pid"
+LABPAGES_LOG_PATH="$APP_LOG/${NAME}.log"
 LABPAGES_DAEMON_OPTS="-p $APP_PORT -P $LABPAGES_PID_PATH -E $APP_ENV $APP_ROOT/config.ru > $LABPAGES_LOG_PATH 2>&1 &"
 
 SIDEKIQ_EXEC="bundle exec sidekiq"
-SIDEKIQ_PID_PATH="/var/run/labpages/sidekiq.pid"
-SIDEKIQ_DAEMON_OPTS="-d -C $APP_CONFIG/sidekiq.yml -r $APP_ROOT/app/workers.rb -e $APP_ENV"
+SIDEKIQ_PID_PATH="$APP_PID/${NAME}_sidekiq.pid"
+SIDEKIQ_LOG_PATH="$APP_LOG/${NAME}_sidekiq.log"
+SIDEKIQ_DAEMON_OPTS="-d -C $APP_CONFIG/sidekiq.yml -r $APP_ROOT/app/workers.rb -e $APP_ENV > $SIDEKIQ_LOG_PATH 2>&1"
 
 execute() {
     cd $APP_ROOT
@@ -63,7 +65,7 @@ start_labpages() {
         return 1
     else
         if [ `whoami` = root ]; then
-            execute "$LABPAGES_EXEC $LABPAGES_DAEMON_OPTS > $LABPAGES_LOG_PATH 2>&1"
+            execute "$LABPAGES_EXEC $LABPAGES_DAEMON_OPTS"
 
             echo -n "Starting $NAME"
 

@@ -1,5 +1,5 @@
-:logfile:     /var/log/labpages/sidekiq.log
-:pidfile:     /var/run/labpages/sidekiq.pid
+:logfile:     /var/log/labpages/labpages_sidekiq.log
+:pidfile:     /var/run/labpages/labpages_sidekiq.pid
 :verbose:     true
 :concurrency: 5
 :timeout:     10

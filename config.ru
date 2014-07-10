@@ -2,7 +2,7 @@ require 'sidekiq/web'
 require 'sidetiq'
 require 'sidetiq/web'
 
-require ::File.expand_path('../application.rb',  __FILE__)
+require ::File.expand_path('application.rb',  __dir__)
 
 map '/' do
   run LabPages::Application
