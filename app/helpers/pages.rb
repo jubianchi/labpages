@@ -38,8 +38,8 @@ module LabPages
         redis.set('labpages:repositories', repositories.to_json)
       end
 
-      def deploy(dir, owner, repository, url = nil)
-        branch = 'gl-pages'
+      def deploy(dir, owner, repository, url = nil, branch = nil)
+        branch = 'gl-pages' if branch.nil?
         user_home = File.join(dir, owner)
         path = File.join(user_home, repository)
 
@@ -66,7 +66,7 @@ module LabPages
 
             begin
               repo = Git.clone(url, repository, :path => user_home)
-              repo.checkout('gl-pages')
+              repo.checkout(branch)
 
               log.info('Successfully cloned repository!')
             rescue Exception => exception
@@ -113,7 +113,7 @@ module LabPages
         end
 
         begin
-          commits = repo.log.between('HEAD~', 'origin/gl-pages')
+          commits = repo.log.between('HEAD~', 'origin/' + repo.current_branch)
         rescue Exception => exception
           log.error(exception)
           commits = 0

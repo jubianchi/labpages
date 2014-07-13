@@ -8,10 +8,10 @@ module LabPages
           info = JSON.parse(request.body.read)
           branch = /([^\/]+)$/.match(info['ref'])[1]
 
-          if branch == 'gl-pages' and info['total_commits_count'] > 0
+          if app.settings.config['tracked_branches'].include?(branch) and info['total_commits_count'] > 0
             matches = info['commits'][0]['url'].scan(/https?:\/\/([^\/]+)\/([^\/]+)\/([^\/]+)/)[0]
 
-            DeployWorker.perform_async(app.settings.config['repo_dir'], matches[1], matches[2], info['repository']['url'])
+            DeployWorker.perform_async(app.settings.config['repo_dir'], matches[1], matches[2], info['repository']['url'], branch)
           end
         end
       end

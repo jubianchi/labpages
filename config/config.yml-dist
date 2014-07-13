@@ -5,3 +5,6 @@ log_file: /var/log/labpages/labpages.log
 domain: gitlab.dp
 gitlab_url: http://gitlab.dp
 logo_src: "http://placekitten.com/400/400"
+tracked_branches:
+    - gl-pages
+    - gh-pages
