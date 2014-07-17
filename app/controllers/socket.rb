@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'sinatra-websocket'
 require 'json'
+require 'eventmachine'
 
 require_relative '../helpers/pages.rb'
 
@@ -17,31 +18,31 @@ module LabPages
 
               ws.onmessage do |message|
                 EM.next_tick do
-                    message = JSON.parse(message)
+                  message = JSON.parse(message)
 
-                    if message['type'] == 'update'
-                      app.settings.sockets.each do |socket|
-                        socket.send(message.to_json)
-                      end
-                    end
-
-                    if message['type'] == 'delete'
-                      app.settings.sockets.each do |socket|
-                        socket.send(message.to_json)
-                      end
-                    end
-
-                    if message['type'] == 'repositories'
-                      fetch_all.each do |repository|
-                        ws.send(
-                            {
-                                :type => 'repository',
-                                :content => repository
-                            }.to_json
-                        )
-                      end
+                  if message['type'] == 'update'
+                    app.settings.sockets.each do |socket|
+                      socket.send(message.to_json)
                     end
                   end
+
+                  if message['type'] == 'delete'
+                    app.settings.sockets.each do |socket|
+                      socket.send(message.to_json)
+                    end
+                  end
+
+                  if message['type'] == 'repositories'
+                    fetch_all.each do |repository|
+                      ws.send(
+                          {
+                              :type => 'repository',
+                              :content => repository
+                          }.to_json
+                      )
+                    end
+                  end
+                end
               end
 
               ws.onclose do

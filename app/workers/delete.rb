@@ -1,5 +1,6 @@
 require 'sidekiq/worker'
-require 'web_socket/web_socket'
+require 'faye/websocket'
+require 'eventmachine'
 
 require_relative '../helpers/pages.rb'
 require_relative '../helpers/redis.rb'
@@ -17,16 +18,20 @@ class DeleteWorker
     config_root = File.join(File.dirname(__FILE__), '..', '..', 'config')
     config = YAML.load_file(File.join(config_root, 'config.yml'))
 
-    client = WebSocket.new('ws://127.0.0.1:' + config['port'].to_s + '/socket')
+    EM.run {
+      client = Faye::WebSocket::Client.new('ws://127.0.0.1:' + config['port'].to_s + '/socket')
 
-    client.send(
-      {
-        :type => 'delete',
-        :content => {
-            :owner => owner,
-            :name => repository
-        }
-      }.to_json
-    )
+      client.send(
+        {
+          :type => 'delete',
+          :content => {
+              :owner => owner,
+              :name => repository
+          }
+        }.to_json
+      )
+
+      client.close
+    }
   end
 end
