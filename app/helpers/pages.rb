@@ -126,7 +126,7 @@ module LabPages
         commits.each_with_index do |commit, key|
           c = [
               commit.sha,
-              commit.message.encode('UTF-8'),
+              commit.message.force_encoding('UTF-8'),
               commit.author.date,
               commit.author.email,
               Digest::MD5.hexdigest(commit.author.email)
