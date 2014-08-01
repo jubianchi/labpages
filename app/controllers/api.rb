@@ -12,11 +12,17 @@ module LabPages
 
           begin
             stats = Sidekiq::Stats.new
+            stats = Sidekiq::Stats.new
+            workers = Sidekiq::Workers.new
 
+            raise if workers.size == 0
+            
             {
                 :message => 'LabPages Web Hook is up and running :-)',
                 :up => true,
                 :sidekiq => {
+                    :workers => workers.size,
+                    :queues => stats.queues,
                     :failed => stats.failed,
                     :processed => stats.processed - stats.failed
                 }
