@@ -10,12 +10,11 @@ module LabPages
         app.get '/api/ping/?' do
           content_type :json
 
-          begin
-            stats = Sidekiq::Stats.new
-            stats = Sidekiq::Stats.new
-            workers = Sidekiq::Workers.new
+          stats = Sidekiq::Stats.new
+          workers = Sidekiq::Workers.new
 
-            raise if workers.size == 0
+          begin
+            raise 'No running worker' if workers.size == 0
             
             {
                 :message => 'LabPages Web Hook is up and running :-)',
@@ -32,7 +31,13 @@ module LabPages
             {
                 :message => 'LabPages Web Hook is down :\'(',
                 :error => msg,
-                :up => false
+                :up => false,
+                :sidekiq => {
+                    :workers => workers.size,
+                    :queues => stats.queues,
+                    :failed => stats.failed,
+                    :processed => stats.processed - stats.failed
+                }
             }
           end.to_json
         end
