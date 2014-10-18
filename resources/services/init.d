@@ -25,12 +25,12 @@ APP_USER="git"
 APP_PORT="8080"
 APP_ENV=production
 
-LABPAGES_EXEC="bundle exec rackup"
+LABPAGES_EXEC="LANG=en_US.UTF-8 bundle exec rackup"
 LABPAGES_PID_PATH="$APP_PID/${NAME}.pid"
 LABPAGES_LOG_PATH="$APP_LOG/${NAME}.log"
 LABPAGES_DAEMON_OPTS="-p $APP_PORT -P $LABPAGES_PID_PATH -E $APP_ENV $APP_ROOT/config.ru > $LABPAGES_LOG_PATH 2>&1 &"
 
-SIDEKIQ_EXEC="bundle exec sidekiq"
+SIDEKIQ_EXEC="LANG=en_US.UTF-8 bundle exec sidekiq"
 SIDEKIQ_PID_PATH="$APP_PID/${NAME}_sidekiq.pid"
 SIDEKIQ_LOG_PATH="$APP_LOG/${NAME}_sidekiq.log"
 SIDEKIQ_DAEMON_OPTS="-d -C $APP_CONFIG/sidekiq.yml -r $APP_ROOT/app/workers.rb -e $APP_ENV > $SIDEKIQ_LOG_PATH 2>&1"
