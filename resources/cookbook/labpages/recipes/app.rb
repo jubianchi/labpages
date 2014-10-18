@@ -1,10 +1,8 @@
-unless ::Dir.exist?(node['labpages']['app_dir'])
-  git node['labpages']['app_dir'] do
-    repository node['labpages']['git_repository']
-    reference node['labpages']['git_revision']
+git node['labpages']['app_dir'] do
+  repository node['labpages']['git_repository']
+  reference node['labpages']['git_revision']
 
-    action :sync
-  end
+  action :sync
 end
 
 [node['labpages']['repo_dir'], node['labpages']['log_dir'], node['labpages']['pid_dir']].each do |dir|
