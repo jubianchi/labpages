@@ -116,7 +116,7 @@ module LabPages
           commits = repo.log.between('HEAD~', 'origin/' + repo.current_branch)
         rescue Exception => exception
           log.error(exception)
-          commits = 0
+          commits = []
         end
 
         if commits.count <= 1
